@@ -6,6 +6,10 @@
 #define R32_HANDLEDATA_H
 
 #include <QObject>
+#include <QVariantMap>
+#include <QMap>
+
+class SerialPortCom;
 
 class HandleData : public QObject
 {
@@ -14,7 +18,10 @@ public:
     explicit HandleData(QObject *parent = nullptr);
     ~HandleData() override;
 
-    void sendData(int cmd, const QVariantMap &info);
+    QByteArray getSendData(int cmd, const QVariantMap &info);
+
+signals:
+    void frameReceived(int cmd, const QVariantMap &info);
 
 // handle send data
 private:
@@ -31,10 +38,23 @@ private:
     void processReceivedData(const QByteArray &data);
     bool frameIsValid(const QByteArray &frameData);
 
+    // 读取含有错误Ack
+    bool readErrorAck(const QByteArray &data, QVariantMap &value);
+    // 读取NTC的ADC值和温度
+    bool read_ntc(const QByteArray &data, QVariantMap &value);
+    // 读取R32的ADC值和浓度
+    bool read_r32(const QByteArray &data, QVariantMap &value);
+    // 读取软件版本号
+    bool readSoftwareVersion(const QByteArray &data, QVariantMap &value);
+    // 读取产品ID号
+    bool readProductInfo(const QByteArray &data, QVariantMap &value);
+
 private:
     unsigned char m_address = 0x00;
     QByteArray m_receivedData;
-};
 
+    typedef bool (HandleData::*readFunc)(const QByteArray &data, QVariantMap &value);
+    QMap<int, readFunc> m_readFuncMap;
+};
 
 #endif //R32_HANDLEDATA_H

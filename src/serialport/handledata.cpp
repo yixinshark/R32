@@ -13,7 +13,13 @@
 HandleData::HandleData(QObject *parent)
     : QObject(parent)
 {
-
+     m_readFuncMap = {
+            {READ_ERROR_CMD, &HandleData::readErrorAck},
+            {NCT_CMD, &HandleData::read_ntc},
+            {R32_CMD, &HandleData::read_r32},
+            {VER_CMD, &HandleData::readSoftwareVersion},
+            {READ_PRODUCT_CMD, &HandleData::readProductInfo},
+    };
 }
 
 HandleData::~HandleData()
@@ -21,10 +27,12 @@ HandleData::~HandleData()
 
 }
 
-void HandleData::sendData(int cmd, const QVariantMap &info)
+QByteArray HandleData::getSendData(int cmd, const QVariantMap &info)
 {
     QByteArray data;
     addContent(cmd, info, data);
+
+    return data;
 }
 
 void HandleData::processReceivedData(const QByteArray &data)
@@ -60,8 +68,19 @@ void HandleData::processReceivedData(const QByteArray &data)
             continue;
         }
 
-        // 发送信号，通知解析完成的帧数据
-        emit frameReceived(command, otherData);
+        // 根据命令号调用相应的处理函数
+        if (m_readFuncMap.contains(command)) {
+            QVariantMap value;
+            if ((this->*m_readFuncMap[command])(otherData, value)) {
+                // 发送信号，通知解析完成的帧数据
+                Q_EMIT frameReceived(command, value);
+            } else {
+                qWarning() << "cmd:" << command << " read data error:" << otherData;
+            }
+        }
+        else {
+            qWarning() << "unknown command:" << command;
+        }
     }
 }
 
@@ -122,8 +141,9 @@ void HandleData::addCheckSum(QByteArray &data)
 
 bool HandleData::addCmd_nd(const QVariantMap &info, QByteArray &data)
 {
-    if (info.contains("concentration")) {
-        int concentration = info.value("concentration").toInt();
+    // 浓度
+    if (info.contains(CONCENTRATION)) {
+        int concentration = info.value(CONCENTRATION).toInt();
         // 添加浓度的高8位和低8位
         data.append(static_cast<char>((concentration >> 8) & 0xFF));
         data.append(static_cast<char>(concentration & 0xFF));
@@ -132,8 +152,9 @@ bool HandleData::addCmd_nd(const QVariantMap &info, QByteArray &data)
         return false;
     }
 
-    if (info.contains("temperature")) {
-        int temperature = info.value("temperature").toDouble() * 10;
+    // 温度
+    if (info.contains(TEMPERATURE)) {
+        int temperature = info.value(TEMPERATURE).toDouble() * 10;
 
         // 添加符号位
         data.append(temperature >= 0 ? 0x00 : 0x01);
@@ -152,20 +173,135 @@ bool HandleData::addCmd_nd(const QVariantMap &info, QByteArray &data)
 bool HandleData::addCmd_set_id(const QVariantMap &info, QByteArray &data)
 {
     // 添加产品种类
-    if (info.contains("type")) {
-        int type = info.value("type").toInt();
+    if (info.contains(PRODUCT_TYPE)) {
+        int type = info.value(PRODUCT_TYPE).toInt();
         data.append(static_cast<char>(type));
+    } else {
+        qWarning() << "product_type not found";
+        return false;
     }
 
     // TODO
-    if (info.contains("id")) {
-        int id = info.value("id").toInt();
+    if (info.contains(PRODUCT_ID)) {
+        int id = info.value(PRODUCT_ID).toInt();
         // 分别添加id的第一个字节，第二个字节，第三个字节，第四个字节
-
+        data.append(static_cast<char>((id >> 24) & 0xFF));
+        data.append(static_cast<char>((id >> 16) & 0xFF));
+        data.append(static_cast<char>((id >> 8) & 0xFF));
+        data.append(static_cast<char>(id & 0xFF));
     } else {
-        qWarning() << "id not found";
+        qWarning() << "product_id not found";
         return false;
     }
 
     return true;
+}
+
+bool HandleData::read_ntc(const QByteArray &data, QVariantMap &value)
+{
+    // NTC的adc值和温度一共五个字节；
+    if (data.length() != 5) {
+        qWarning() << "ntc data length error";
+        return false;
+    }
+
+    // 前两个字节分别为adc的高8位和低8位，
+    int adc = (static_cast<quint8>(data.at(0)) << 8) | static_cast<quint8>(data.at(1));
+    value.insert(ADC_VALUE, adc);
+
+    // 后三个字节分别为温度的符号位(0x00:代表正数0x01:代表负数)、温度乘以10的高8位和温度乘以10的低8位
+    int temp = (static_cast<quint8>(data.at(2)) << 16) |
+            (static_cast<quint8>(data.at(3)) << 8) |
+            static_cast<quint8>(data.at(4));
+    double temperature = temp / 10.0;
+
+    switch (data[2]) {
+        case 0x00:
+            value.insert(TEMPERATURE, QString::number(temperature));
+            break;
+        case 0x01:
+            value.insert(TEMPERATURE, QString::number(-temperature));
+            break;
+        case 0x02:
+            value.insert(TEMPERATURE, NTC_STATUS_2);
+            break;
+        case 0x03:
+            value.insert(TEMPERATURE, NTC_STATUS_3);
+            break;
+    }
+
+    return true;
+}
+
+bool HandleData::read_r32(const QByteArray &data, QVariantMap &value)
+{
+    // R32的adc值和浓度一共4个字节；
+    if (data.length() != 4) {
+        qWarning() << "r32 data length error";
+        return false;
+    }
+
+    // 前两个字节分别为adc的高8位和低8位
+    int adc = (static_cast<quint8>(data.at(0)) << 8) | static_cast<quint8>(data.at(1));
+    value.insert(ADC_VALUE, adc);
+
+    // 后两个字节分别为浓度的高8位和低8位
+    int concentration = (static_cast<quint8>(data.at(2)) << 8) | static_cast<quint8>(data.at(3));
+    value.insert(CONCENTRATION, concentration);
+
+    return true;
+}
+
+bool HandleData::readSoftwareVersion(const QByteArray &data, QVariantMap &value)
+{
+    // 软件版本号一共4个字节；
+    if (data.length() != 4) {
+        qWarning() << "software version data length error";
+        return false;
+    }
+
+    // TODO 确认格式
+    // 4个字节分别为软件版本号的第一个字节，第二个字节，第三个字节，第四个字节
+    QString version = QString::number(static_cast<quint8>(data.at(0))) + "." +
+                      QString::number(static_cast<quint8>(data.at(1))) + "." +
+                      QString::number(static_cast<quint8>(data.at(2))) + "." +
+                      QString::number(static_cast<quint8>(data.at(3)));
+    value.insert(SOFTWARE_VERSION, version);
+
+    return true;
+}
+
+bool HandleData::readProductInfo(const QByteArray &data, QVariantMap &value)
+{
+    // 一共5个字节，第一个字节为产品种类，后四个字节为产品id
+    if (data.length() != 5) {
+        qWarning() << "product info data length error";
+        return false;
+    }
+
+    // 第一个字节为产品种类
+    int type = static_cast<quint8>(data.at(0));
+    value.insert(PRODUCT_TYPE, type);
+
+    // TODO 产品id是整形还是字符串
+    // 后四个字节为产品id
+    int id = (static_cast<quint8>(data.at(1)) << 24) | (static_cast<quint8>(data.at(2)) << 16) |
+            (static_cast<quint8>(data.at(3)) << 8) | static_cast<quint8>(data.at(4));
+    value.insert(PRODUCT_ID, id);
+
+    return true;
+}
+
+bool HandleData::readErrorAck(const QByteArray &data, QVariantMap &value)
+{
+    // 只有一个字节，代表错误码
+    if (data.length() != 1) {
+        qWarning() << "error ack data length error";
+        return false;
+    }
+
+    int error = static_cast<quint8>(data.at(0));
+    value.insert(ERROR_MSG, errorMsg.value(error, ERROR_MSG_UNKNOWN));
+
+    return false;
 }
