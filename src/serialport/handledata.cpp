@@ -21,6 +21,12 @@ HandleData::~HandleData()
 
 }
 
+void HandleData::sendData(int cmd, const QVariantMap &info)
+{
+    QByteArray data;
+    addContent(cmd, info, data);
+}
+
 void HandleData::processReceivedData(const QByteArray &data)
 {
     m_receivedData.append(data);
@@ -77,16 +83,6 @@ bool HandleData::frameIsValid(const QByteArray &frameData) {
     return true;
 }
 
-void HandleData::addCheckSum(QByteArray &data)
-{
-    quint16 checksum = 0;
-    for (int i = 0; i < data.length(); ++i)
-        checksum += static_cast<quint8>(data.at(i));
-
-    data.append(static_cast<char>((checksum >> 8) & 0xFF));
-    data.append(static_cast<char>(checksum & 0xFF));
-}
-
 void HandleData::addContent(int cmd, const QVariantMap &info, QByteArray &data)
 {
     data.append(header0);
@@ -95,8 +91,33 @@ void HandleData::addContent(int cmd, const QVariantMap &info, QByteArray &data)
     data.append(m_address);
     data.append(static_cast<char>(cmd));
 
-//    if ()
+    switch (cmd) {
+        case cmd_nd:
+            if (!addCmd_nd(info, data))
+                return;
+            break;
+        case cmd_set_id:
+            if (!addCmd_set_id(info, data))
+                return;
+            break;
+        default:
+            break;
+    }
 
+    // 填充长度，+2为校验和2字节
+    data[2] = static_cast<char>(data.length() + 2);
+
+    addCheckSum(data);
+}
+
+void HandleData::addCheckSum(QByteArray &data)
+{
+    quint16 checksum = 0;
+    for (int i = 0; i < data.length(); ++i)
+        checksum += static_cast<quint8>(data.at(i));
+
+    data.append(static_cast<char>((checksum >> 8) & 0xFF));
+    data.append(static_cast<char>(checksum & 0xFF));
 }
 
 bool HandleData::addCmd_nd(const QVariantMap &info, QByteArray &data)
@@ -128,7 +149,6 @@ bool HandleData::addCmd_nd(const QVariantMap &info, QByteArray &data)
     return true;
 }
 
-// 
 bool HandleData::addCmd_set_id(const QVariantMap &info, QByteArray &data)
 {
     // 添加产品种类

@@ -14,20 +14,10 @@ public:
     explicit HandleData(QObject *parent = nullptr);
     ~HandleData() override;
 
-    void sendData(const QVariantMap &data);
+    void sendData(int cmd, const QVariantMap &info);
 
 // handle send data
 private:
-    void sendCmd_ld();
-    void sendCmd_nd();
-    void sendCmd_ntc();
-    void sendCmd_r32();
-    void sendCmd_ver();
-    void sendCmd_set_id();
-    void sendCmd_read_id();
-    void sendCmd_set_addr();
-    void sendCmd_read_addr();
-
     void addContent(int cmd, const QVariantMap &info, QByteArray &data);
     void addCheckSum(QByteArray &data);
 
