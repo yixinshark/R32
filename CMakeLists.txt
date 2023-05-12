@@ -14,7 +14,23 @@ find_package(Qt5 COMPONENTS
         SerialPort
         REQUIRED)
 
-add_executable(r32 src/main.cpp src/serialport/serialportcom.cpp src/serialport/serialportcom.h src/serialport/handledata.cpp src/serialport/handledata.h src/serialport/constant.h)
+add_executable(r32 src/main.cpp
+        src/serialport/serialportcom.cpp
+        src/serialport/serialportcom.h
+        src/serialport/handledata.cpp
+        src/serialport/handledata.h
+        src/serialport/constant.h
+        src/widget/delayedbutton.cpp
+        src/widget/delayedbutton.h
+        src/widget/operatewidget.cpp
+        src/widget/operatewidget.h
+        src/widget/historydatawidget.cpp
+        src/widget/historydatawidget.h
+        src/widget/mainwidget.cpp
+        src/widget/mainwidget.h
+        src/widget/tabwidget.cpp
+        src/widget/tabwidget.h)
+
 target_link_libraries(r32
         Qt5::Core
         Qt5::Gui
