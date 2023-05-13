@@ -22,9 +22,12 @@ public:
     int getSelectedDataBits() const;
     QString getSelectedStopBits() const;
 
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
 private:
     void initUI();
-    QStringList getAvailablePorts() const;
+    void updateAvailablePorts() const;
 
 private:
     QComboBox *m_portComboBox;

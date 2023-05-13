@@ -17,8 +17,8 @@ find_package(Qt5 COMPONENTS
 add_executable(r32 src/main.cpp
         src/serialport/serialportcom.cpp
         src/serialport/serialportcom.h
-        src/serialport/handledata.cpp
         src/serialport/handledata.h
+        src/serialport/handledata.cpp
         src/serialport/constant.h
         src/widget/delayedbutton.cpp
         src/widget/delayedbutton.h
@@ -29,7 +29,16 @@ add_executable(r32 src/main.cpp
         src/widget/mainwidget.cpp
         src/widget/mainwidget.h
         src/widget/tabwidget.cpp
-        src/widget/tabwidget.h src/widget/labelbutton.cpp src/widget/labelbutton.h src/widget/serialportsettingswidget.h src/widget/serialportsettingswidget.cpp src/widget/operatebasewidget.h src/widget/operatebasewidget.cpp src/widget/recvr32datawidget.h src/widget/recvr32datawidget.cpp src/widget/sendcmdwidget.cpp)
+        src/widget/tabwidget.h
+        src/widget/labelbutton.cpp
+        src/widget/labelbutton.h
+        src/widget/serialportsettingswidget.h
+        src/widget/serialportsettingswidget.cpp
+        src/widget/operatebasewidget.h
+        src/widget/operatebasewidget.cpp
+        src/widget/recvr32datawidget.h
+        src/widget/recvr32datawidget.cpp
+        src/widget/sendcmdwidget.cpp)
 
 target_link_libraries(r32
         Qt5::Core

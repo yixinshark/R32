@@ -74,6 +74,8 @@ void SendCmdWidget::sendDataBtnClicked()
     QByteArray data = m_handleData->getSendData(cmd, QVariantMap());
     qInfo() << "send cmd: " << cmd << " data:" << data;
 
+    operateMsg("发送数据:" + data.toHex());
+
     // TODO data info
     m_serialPortCom->sendData(data);
 }

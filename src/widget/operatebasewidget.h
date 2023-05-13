@@ -20,9 +20,13 @@ public:
     explicit OperateBaseWidget(QWidget *parent = nullptr);
     ~OperateBaseWidget() override;
 
+signals:
+    void operatedMsg(const QString &msg);
+
 protected:
     QLayout *initSerialPortUI();
     virtual void recvAckData() {};
+    void operateMsg(const QString &msg);
 
 private:
     bool connectSerialPort();

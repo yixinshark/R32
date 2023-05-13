@@ -22,6 +22,7 @@ public:
 
 signals:
     void frameReceived(int cmd, const QVariantMap &info);
+    void recvedFrameData(const QByteArray &frameData);
 
 public slots:
     void processReceivedData(const QByteArray &data);

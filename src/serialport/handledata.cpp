@@ -64,9 +64,12 @@ void HandleData::processReceivedData(const QByteArray &data)
         QByteArray otherData = frameData.mid(4, length - 6);
 
         if (!frameIsValid(frameData)) {
+            qWarning() << "recv frame is valid: " << frameData.toHex();
             // 校验和错误，丢弃该帧数据
             continue;
         }
+
+        Q_EMIT recvedFrameData(frameData);
 
         // 根据命令号调用相应的处理函数
         if (m_readFuncMap.contains(command)) {
@@ -87,12 +90,13 @@ void HandleData::processReceivedData(const QByteArray &data)
 bool HandleData::frameIsValid(const QByteArray &frameData) {
     // 提取校验和
     QByteArray checksumBytes = frameData.right(2);
-    quint16 checksum = (static_cast<quint8>(checksumBytes.at(1)) << 8) | static_cast<quint8>(checksumBytes.at(0));
+    quint16 checksum = (static_cast<quint8>(checksumBytes.at(0)) << 8) | static_cast<quint8>(checksumBytes.at(1));
 
     // 校验校验和
     quint16 calculatedChecksum = 0;
-    for (int i = 0; i < frameData.length() - 2; ++i)
+    for (int i = 0; i < frameData.length() - 2; ++i) {
         calculatedChecksum += static_cast<quint8>(frameData.at(i));
+    }
 
     if (calculatedChecksum != checksum) {
         // 校验和错误，丢弃该帧数据

@@ -33,8 +33,7 @@ bool SerialPortCom::openSerialPort(const QString &portName, qint32 baudRate, QSe
     b &= m_serialPort->setParity(parity);
     b &= m_serialPort->setStopBits(stopBits);
 
-    if (b && m_serialPort->open(QIODevice::ReadWrite))
-    {
+    if (b && m_serialPort->open(QIODevice::ReadWrite)) {
         connect(m_serialPort, &QSerialPort::readyRead, this, &SerialPortCom::readData);
         qInfo() << "serialPort opened successfully:" << portName;
 
@@ -45,8 +44,8 @@ bool SerialPortCom::openSerialPort(const QString &portName, qint32 baudRate, QSe
         return true;
     }
 
+    qWarning() << "open serialPort failed:" << portName << " error:" << m_serialPort->errorString() << " setAttr:" << b;
     return false;
-    qWarning() << "open serialPort failed:" << portName << " setAttr:" << b;
 }
 
 void SerialPortCom::closeSerialPort()

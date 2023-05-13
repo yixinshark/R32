@@ -26,12 +26,16 @@ OperateBaseWidget::OperateBaseWidget(QWidget *parent)
     connect(m_serialPortCom, &SerialPortCom::dataReceived,
             m_handleData, &HandleData::processReceivedData);
 
+    connect(m_handleData, &HandleData::recvedFrameData, this, [this](const QByteArray &data){
+        operateMsg("接收到数据:" + data.toHex());
+    });
+
     connect(m_connectBtn, &QPushButton::clicked, this, [this]{
-        qInfo() << "----------begin connect serial prot-----------";
         m_connectBtn->setEnabled(false);
 
         // 准备连接
         if (m_connectBtn->objectName() == "connect") {
+            qInfo() << "----------begin connect serial prot-----------";
             if (connectSerialPort()) {
                 m_connectBtn->setObjectName("disConnect");
                 m_connectBtn->setText("断开");
@@ -40,6 +44,7 @@ OperateBaseWidget::OperateBaseWidget(QWidget *parent)
             m_serialPortCom->closeSerialPort();
             m_connectBtn->setObjectName("connect");
             m_connectBtn->setText("连接");
+            operateMsg(m_serialPortSettings->getSelectedPort() + " 连接断开");
         }
 
         // 1s后使能
@@ -106,8 +111,20 @@ bool OperateBaseWidget::connectSerialPort()
         sStopBits = QSerialPort::OneAndHalfStop;
     }
 
-    qInfo() << "cmd serialPort connected:" << portName << " " << baudRate << " parity:" << parity
-        << " dataBits:" << dataBits << " stopBits:" << stopBits;
+    //qInfo() << "cmd serialPort connected:" << portName << " " << baudRate << " parity:" << parity
+    //    << " dataBits:" << dataBits << " stopBits:" << stopBits;
 
-   return  m_serialPortCom->openSerialPort(portName, baudRate, sDataBits, sParity, sStopBits);
+    bool ret = m_serialPortCom->openSerialPort(portName, baudRate, sDataBits, sParity, sStopBits);
+    QString msg = ret ? "连接成功" : "连接失败";
+    msg += " serialPort:" + portName + " 波特率:" + QString::number(baudRate) + " 检验和:" +
+            parity + " 数据位:" + QString::number(dataBits) + " 停止位:" + stopBits;
+
+    operateMsg(msg);
+
+   return ret;
+}
+
+void OperateBaseWidget::operateMsg(const QString &msg)
+{
+    Q_EMIT operatedMsg(msg);
 }

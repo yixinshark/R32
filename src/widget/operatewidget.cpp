@@ -7,16 +7,22 @@
 #include "sendcmdwidget.h"
 #include "recvr32datawidget.h"
 
+#include <QLabel>
 #include <QGroupBox>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QDateTime>
 
 OperateWidget::OperateWidget(QWidget *parent)
     : QWidget(parent)
     , m_sendCmdWidget(new SendCmdWidget(this))
     , m_recvR32DataWidget(new RecvR32DataWidget(this))
+    , m_msgLabel(new QLabel(this))
 {
     initUI();
+
+    connect(m_sendCmdWidget, &SendCmdWidget::operatedMsg, this, &OperateWidget::showMsg);
+    connect(m_recvR32DataWidget, &RecvR32DataWidget::operatedMsg, this, &OperateWidget::showMsg);
 }
 
 OperateWidget::~OperateWidget()
@@ -49,6 +55,13 @@ void OperateWidget::initUI()
 
 
     mainLayout->addStretch();
+    mainLayout->addWidget(m_msgLabel);
 
     setLayout(mainLayout);
+}
+
+void OperateWidget::showMsg(const QString &msg)
+{
+    m_msgLabel->clear();
+    m_msgLabel->setText(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") + " " + msg);
 }

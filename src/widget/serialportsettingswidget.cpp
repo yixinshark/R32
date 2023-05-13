@@ -4,6 +4,8 @@
 
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QDebug>
+#include <QEvent>
 #include <QComboBox>
 #include <QSerialPortInfo>
 
@@ -38,7 +40,8 @@ void SerialPortSettingsWidget::initUI()
 
     // 串口号选择
     auto *portLabel = new QLabel("串口:", this);
-    m_portComboBox->addItems(getAvailablePorts());
+    updateAvailablePorts();
+    m_portComboBox->installEventFilter(this);
     hLayout->addWidget(portLabel);
     hLayout->addWidget(m_portComboBox);
 //    hLayout->addStretch();
@@ -80,14 +83,48 @@ void SerialPortSettingsWidget::initUI()
     setLayout(mainLayout);
 }
 
-QStringList SerialPortSettingsWidget::getAvailablePorts() const
+void SerialPortSettingsWidget::updateAvailablePorts() const
 {
+    qInfo() << "available ports:" << QSerialPortInfo::availablePorts().size();
+
     QStringList ports;
-    foreach(const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
-        ports.append(info.portName());
+    if (m_portComboBox->count()) {
+        ports.append(m_portComboBox->currentText());
+
+        m_portComboBox->clear();
     }
 
-    return ports;
+    QList<QSerialPortInfo> serials = QSerialPortInfo::availablePorts();
+    foreach(const QSerialPortInfo &info, serials) {
+        if (!ports.contains(info.portName()))
+            ports.append(info.portName());
+    }
+
+    // for test
+#ifdef QT_DEBUG
+    if (!ports.contains("/dev/pts/0"))
+        ports.append("/dev/pts/0");
+
+    if (!ports.contains("/dev/pts/1"))
+        ports.append("/dev/pts/1");
+
+    if (!ports.contains("/dev/pts/2"))
+        ports.append("/dev/pts/2");
+
+    if (!ports.contains("/dev/pts/3"))
+        ports.append("/dev/pts/3");
+
+    if (!ports.contains("/dev/pts/4"))
+        ports.append("/dev/pts/4");
+
+    if (!ports.contains("/dev/pts/5"))
+        ports.append("/dev/pts/5");
+
+    if (!ports.contains("/dev/pts/6"))
+        ports.append("/dev/pts/6");
+#endif
+
+    m_portComboBox->addItems(ports);
 }
 
 QString SerialPortSettingsWidget::getSelectedPort() const
@@ -113,4 +150,13 @@ int SerialPortSettingsWidget::getSelectedDataBits() const
 QString SerialPortSettingsWidget::getSelectedStopBits() const
 {
     return m_stopBitsComboBox->currentText();
+}
+
+bool SerialPortSettingsWidget::eventFilter(QObject *watched, QEvent *event)
+{
+    if(event->type() == QEvent::MouseButtonPress && watched == m_portComboBox) {
+        updateAvailablePorts();
+    }
+
+    return QObject::eventFilter(watched, event);
 }

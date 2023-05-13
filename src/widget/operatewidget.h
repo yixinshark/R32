@@ -10,6 +10,7 @@
 class SendCmdWidget;
 class RecvR32DataWidget;
 
+class QLabel;
 class OperateWidget : public QWidget {
 Q_OBJECT
 
@@ -19,10 +20,13 @@ public:
 
 private:
     void initUI();
+    void showMsg(const QString &msg);
 
 private:
     SendCmdWidget *m_sendCmdWidget;
     RecvR32DataWidget *m_recvR32DataWidget;
+
+    QLabel *m_msgLabel;
 };
 
 
