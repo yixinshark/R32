@@ -11,8 +11,7 @@ class DelayedButton : public QPushButton
 {
     Q_OBJECT
 public:
-    explicit DelayedButton(QWidget *parent = nullptr);
-
+    explicit DelayedButton(const QString &text, QWidget *parent = nullptr);
     ~DelayedButton() override;
 
 signals:

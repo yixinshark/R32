@@ -6,8 +6,7 @@
 #define R32_SERIALPORTCOM_H
 
 #include <QObject>
-
-class QSerialPort;
+#include <QSerialPort>
 
 class SerialPortCom : public QObject
 {
@@ -16,7 +15,8 @@ public:
     explicit SerialPortCom(QObject *parent = nullptr);
     ~SerialPortCom() override;
 
-    bool openSerialPort(const QString &portName, qint32 baudRate);
+    bool openSerialPort(const QString &portName, qint32 baudRate, QSerialPort::DataBits dataBits,
+                        QSerialPort::Parity parity, QSerialPort::StopBits stopBits);
     void closeSerialPort();
     bool isSerialPortOpen() const;
 

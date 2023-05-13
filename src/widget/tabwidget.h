@@ -10,7 +10,7 @@
 #include <QStackedLayout>
 #include <QMap>
 
-class QLabel;
+class LabelButton;
 
 class TabWidget : public QWidget
 {
@@ -26,10 +26,10 @@ public:
     bool eventFilter(QObject* obj, QEvent* event) override;
 
 private:
-    void setLabelSelected(QLabel* label);
+    void setLabelSelected(LabelButton* label);
 
 private:
-    QMap<QString, QLabel *> m_tabLabelMap;
+    QMap<QString, LabelButton *> m_tabLabelMap;
     QMap<QString, QWidget *> m_tabWidgetMap;
 
     QHBoxLayout *m_titleLayout = nullptr;

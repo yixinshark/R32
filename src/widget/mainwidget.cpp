@@ -9,7 +9,6 @@
 
 #include <QVBoxLayout>
 #include <QTabWidget>
-#include <QTabBar>
 
 MainWidget::MainWidget(QWidget *parent)
     : QWidget(parent)
@@ -28,7 +27,7 @@ void MainWidget::initUI()
 {
     setMinimumSize(800, 600);
 
-    TabWidget *tabWidget = new TabWidget(this);
+    auto *tabWidget = new TabWidget(this);
     QStringList tabs;
     tabs << "Operation" << "History";
     tabWidget->addTabs(tabs);
@@ -36,6 +35,6 @@ void MainWidget::initUI()
     tabWidget->addWidget(tabs[1], m_historyDataWidget);
     tabWidget->setDefaultWidget(tabs[0]);
 
-    QVBoxLayout *layout = new QVBoxLayout(this);
+    auto *layout = new QVBoxLayout(this);
     layout->addWidget(tabWidget);
 }

@@ -7,6 +7,9 @@
 
 #include <QWidget>
 
+class SendCmdWidget;
+class RecvR32DataWidget;
+
 class OperateWidget : public QWidget {
 Q_OBJECT
 
@@ -15,6 +18,11 @@ public:
     ~OperateWidget() override;
 
 private:
+    void initUI();
+
+private:
+    SendCmdWidget *m_sendCmdWidget;
+    RecvR32DataWidget *m_recvR32DataWidget;
 };
 
 

@@ -23,6 +23,9 @@ public:
 signals:
     void frameReceived(int cmd, const QVariantMap &info);
 
+public slots:
+    void processReceivedData(const QByteArray &data);
+
 // handle send data
 private:
     void addContent(int cmd, const QVariantMap &info, QByteArray &data);
@@ -35,7 +38,6 @@ private:
 
 // handle recv data
 private:
-    void processReceivedData(const QByteArray &data);
     bool frameIsValid(const QByteArray &frameData);
 
     // 读取含有错误Ack

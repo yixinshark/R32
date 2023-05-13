@@ -9,7 +9,6 @@
 #include <QDebug>
 #include <QSerialPort>
 
-
 SerialPortCom::SerialPortCom(QObject *parent)
     : QObject(parent)
     , m_serialPort(new QSerialPort(this))
@@ -22,21 +21,32 @@ SerialPortCom::~SerialPortCom()
     closeSerialPort();
 }
 
-bool SerialPortCom::openSerialPort(const QString &portName, qint32 baudRate)
+bool SerialPortCom::openSerialPort(const QString &portName, qint32 baudRate, QSerialPort::DataBits dataBits,
+                                   QSerialPort::Parity parity, QSerialPort::StopBits stopBits)
 {
     if (m_serialPort->isOpen())
         return true;
 
     m_serialPort->setPortName(portName);
-    m_serialPort->setBaudRate(baudRate);
-    if (m_serialPort->open(QIODevice::ReadWrite))
+    bool b = m_serialPort->setBaudRate(baudRate);
+    b &= m_serialPort->setDataBits(dataBits);
+    b &= m_serialPort->setParity(parity);
+    b &= m_serialPort->setStopBits(stopBits);
+
+    if (b && m_serialPort->open(QIODevice::ReadWrite))
     {
         connect(m_serialPort, &QSerialPort::readyRead, this, &SerialPortCom::readData);
+        qInfo() << "serialPort opened successfully:" << portName;
+
+        connect(m_serialPort, &QSerialPort::errorOccurred, this, [this](QSerialPort::SerialPortError error){
+            qWarning() << "serialPort:" << m_serialPort->portName() << " has error:" << error;
+        });
+
         return true;
     }
 
     return false;
-    qWarning() << "open serial port failed:" << portName;
+    qWarning() << "open serialPort failed:" << portName << " setAttr:" << b;
 }
 
 void SerialPortCom::closeSerialPort()

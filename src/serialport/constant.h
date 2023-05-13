@@ -60,7 +60,25 @@ const unsigned char SET_PRODUCT_ADDR_CMD = 0xFD;
 const unsigned char READ_PRODUCT_ADDR_CMD = 0xFE;
 const unsigned char READ_ERROR_CMD = 0xFF;
 
+const QString CMD1_OBJECT_NAME = "cmd1";
+const QString CMD2_OBJECT_NAME = "cmd2";
+const QString CMD3_OBJECT_NAME = "cmd3";
+const QString CMD4_OBJECT_NAME = "cmd4";
+const QString CMD5_OBJECT_NAME = "cmd5";
+const QString CMD6_OBJECT_NAME = "cmd6";
+const QString CMD7_OBJECT_NAME = "cmd7";
+const QString CMD8_OBJECT_NAME = "cmd8";
 
+
+// 按钮objectName与命令号映射
+const QMap<QString, unsigned char> ObjectNameCmdMap = {
+        {CMD1_OBJECT_NAME, LD_CMD},
+        {CMD2_OBJECT_NAME, ND_CMD},
+        {CMD3_OBJECT_NAME, NCT_CMD},
+        {CMD4_OBJECT_NAME, R32_CMD},
+        {CMD5_OBJECT_NAME, VER_CMD},
+        {CMD6_OBJECT_NAME, SET_ID_CMD}
+};
 
 
 // 零点标定, 0x01

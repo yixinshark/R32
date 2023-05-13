@@ -7,8 +7,8 @@
 
 #include <QTimer>
 
-DelayedButton::DelayedButton(QWidget *parent)
-    : QPushButton(parent)
+DelayedButton::DelayedButton(const QString &text, QWidget *parent)
+    : QPushButton(text, parent)
     , m_timer(new QTimer(this))
 {
     connect(this, &QPushButton::clicked, this, &DelayedButton::handleButtonClicked);

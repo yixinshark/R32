@@ -29,7 +29,7 @@ add_executable(r32 src/main.cpp
         src/widget/mainwidget.cpp
         src/widget/mainwidget.h
         src/widget/tabwidget.cpp
-        src/widget/tabwidget.h)
+        src/widget/tabwidget.h src/widget/labelbutton.cpp src/widget/labelbutton.h src/widget/serialportsettingswidget.h src/widget/serialportsettingswidget.cpp src/widget/operatebasewidget.h src/widget/operatebasewidget.cpp src/widget/recvr32datawidget.h src/widget/recvr32datawidget.cpp src/widget/sendcmdwidget.cpp)
 
 target_link_libraries(r32
         Qt5::Core

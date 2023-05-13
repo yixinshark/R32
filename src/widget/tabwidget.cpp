@@ -2,11 +2,11 @@
 // Created by zyz on 23-5-12.
 //
 
-#include <QLabel>
 #include <QEvent>
 #include <QDebug>
 
 #include "tabwidget.h"
+#include "labelbutton.h"
 
 TabWidget::TabWidget(QWidget *parent)
     : QWidget(parent)
@@ -14,6 +14,7 @@ TabWidget::TabWidget(QWidget *parent)
     , m_stackedLayout(new QStackedLayout())
 {
     QVBoxLayout *mainLayout = new QVBoxLayout();
+    mainLayout->setContentsMargins(5, 0, 5, 0);
     mainLayout->addLayout(m_titleLayout);
     mainLayout->addLayout(m_stackedLayout);
     setLayout(mainLayout);
@@ -26,9 +27,9 @@ TabWidget::~TabWidget()
 void TabWidget::addTabs(const QStringList &tabs)
 {
     for (const QString &tab : tabs) {
-        QLabel* label = new QLabel(tab, this);
-        label->setAlignment(Qt::AlignCenter);
-        label->setAutoFillBackground(true);
+        auto* label = new LabelButton(tab, this);
+//        label->setAlignment(Qt::AlignCenter);
+//        label->setAutoFillBackground(true);
         label->installEventFilter(this);
         m_titleLayout->addWidget(label);
         m_tabLabelMap.insert(tab, label);
@@ -38,7 +39,7 @@ void TabWidget::addTabs(const QStringList &tabs)
 bool TabWidget::eventFilter(QObject *obj, QEvent *event)
 {
     if (event->type() == QEvent::MouseButtonPress) {
-        QLabel *label = qobject_cast<QLabel*>(obj);
+        auto *label = qobject_cast<LabelButton *>(obj);
         if (label) {
             if (m_tabWidgetMap.contains(label->text())) {
                 m_stackedLayout->setCurrentWidget(m_tabWidgetMap.value(label->text()));
@@ -52,18 +53,16 @@ bool TabWidget::eventFilter(QObject *obj, QEvent *event)
     return QWidget::eventFilter(obj, event);
 }
 
-void TabWidget::setLabelSelected(QLabel *selectedLabel)
+void TabWidget::setLabelSelected(LabelButton *selectedLabel)
 {
     QPalette palette;
-    QList<QLabel *> labels = m_tabLabelMap.values();
-    for (QLabel *label : labels) {
+    QList<LabelButton *> labels = m_tabLabelMap.values();
+    for (LabelButton *label : labels) {
         if (label == selectedLabel) {
-            palette.setColor(QPalette::Background, Qt::lightGray);
+            label->setChecked(true);
         } else {
-            palette.setColor(QPalette::Background, Qt::white);
+            label->setChecked(false);
         }
-
-        label->setPalette(palette);
     }
 }
 
