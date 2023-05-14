@@ -19,6 +19,7 @@ HandleData::HandleData(QObject *parent)
             {R32_CMD, &HandleData::read_r32},
             {VER_CMD, &HandleData::readSoftwareVersion},
             {READ_PRODUCT_CMD, &HandleData::readProductInfo},
+            {READ_PRODUCT_ADDR_CMD, &HandleData::readSlaveProductAddress}
     };
 }
 
@@ -115,12 +116,16 @@ void HandleData::addContent(int cmd, const QVariantMap &info, QByteArray &data)
     data.append(static_cast<char>(cmd));
 
     switch (cmd) {
-        case cmd_nd:
+        case ND_CMD:
             if (!addCmd_nd(info, data))
                 return;
             break;
-        case cmd_set_id:
+        case SET_ID_CMD:
             if (!addCmd_set_id(info, data))
+                return;
+            break;
+        case SET_SLAVE_ADDR_CMD:
+            if (!addCmd_set_slave_address(info, data))
                 return;
             break;
         default:
@@ -179,7 +184,7 @@ bool HandleData::addCmd_set_id(const QVariantMap &info, QByteArray &data)
     // 添加产品种类
     if (info.contains(PRODUCT_TYPE)) {
         int type = info.value(PRODUCT_TYPE).toInt();
-        data.append(static_cast<char>(type));
+        data.append(static_cast<unsigned char>(type));
     } else {
         qWarning() << "product_type not found";
         return false;
@@ -307,5 +312,33 @@ bool HandleData::readErrorAck(const QByteArray &data, QVariantMap &value)
     int error = static_cast<quint8>(data.at(0));
     value.insert(ERROR_MSG, errorMsg.value(error, ERROR_MSG_UNKNOWN));
 
-    return false;
+    return true;
+}
+
+bool HandleData::addCmd_set_slave_address(const QVariantMap &info, QByteArray &data)
+{
+    if (!info.contains(SLAVE_ADDRESS)|| !info.contains(STATIC_ADDRESS)) {
+        qWarning() << "set product slave address info error:" << info;
+        return false;
+    }
+
+    data.append(static_cast<unsigned char>(info.value(SLAVE_ADDRESS).toInt()));
+
+    // 固定地址
+    data[3] = (static_cast<unsigned char>(info.value(STATIC_ADDRESS).toInt()));
+
+    return true;
+}
+
+bool HandleData::readSlaveProductAddress(const QByteArray &data, QVariantMap &value)
+{
+    // 只有一个字节，代表错误码
+    if (data.length() != 1) {
+        qWarning() << "error read-product-slave-address data length error";
+        return false;
+    }
+
+    value.insert(SLAVE_ADDRESS, data[0]);
+
+    return true;
 }

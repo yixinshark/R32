@@ -9,6 +9,7 @@
 
 class QPushButton;
 
+class StatusWidget;
 class HandleData;
 class SerialPortCom;
 class SerialPortSettingsWidget;
@@ -33,6 +34,7 @@ private:
 
 protected:
     QPushButton *m_connectBtn;
+    StatusWidget *m_cntStatusWidget;
     SerialPortSettingsWidget *m_serialPortSettings;
 
     SerialPortCom *m_serialPortCom;

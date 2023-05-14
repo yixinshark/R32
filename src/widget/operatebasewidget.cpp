@@ -4,6 +4,7 @@
 
 #include "operatebasewidget.h"
 #include "serialportsettingswidget.h"
+#include "statuswidget.h"
 
 #include "../serialport/handledata.h"
 #include "../serialport/serialportcom.h"
@@ -17,6 +18,7 @@
 OperateBaseWidget::OperateBaseWidget(QWidget *parent)
     : QWidget(parent)
     , m_connectBtn(new QPushButton("连接", this))
+    , m_cntStatusWidget(new StatusWidget(this))
     , m_serialPortSettings(new SerialPortSettingsWidget(this))
     , m_serialPortCom(new SerialPortCom(this))
     , m_handleData(new HandleData(this))
@@ -37,11 +39,13 @@ OperateBaseWidget::OperateBaseWidget(QWidget *parent)
         if (m_connectBtn->objectName() == "connect") {
             qInfo() << "----------begin connect serial prot-----------";
             if (connectSerialPort()) {
+                m_cntStatusWidget->setSelected(true);
                 m_connectBtn->setObjectName("disConnect");
                 m_connectBtn->setText("断开");
             }
         } else if (m_connectBtn->objectName() == "disConnect") {
             m_serialPortCom->closeSerialPort();
+            m_cntStatusWidget->setSelected(false);
             m_connectBtn->setObjectName("connect");
             m_connectBtn->setText("连接");
             operateMsg(m_serialPortSettings->getSelectedPort() + " 连接断开");
@@ -64,7 +68,14 @@ QLayout *OperateBaseWidget::initSerialPortUI()
     auto *hLayout = new QHBoxLayout();
     hLayout->setContentsMargins(0, 0, 0, 0);
     hLayout->addWidget(m_serialPortSettings);
-    hLayout->addWidget(m_connectBtn);
+
+    auto *vLayout = new QVBoxLayout();
+    vLayout->setSpacing(5);
+    vLayout->setContentsMargins(0, 0, 0, 0);
+    vLayout->addWidget(m_cntStatusWidget);
+    vLayout->addWidget(m_connectBtn);
+
+    hLayout->addLayout(vLayout);
 
     return  hLayout;
 }

@@ -11,11 +11,11 @@
 const char header0 = 0x47;
 const char header1 = 0x4c;
 
-// 浓度标定, 0x02
-const char cmd_nd = 0x02;
-
-// 设置产品的ID号(唯一识别码)
-const char cmd_set_id = 0x06;
+//// 浓度标定, 0x02
+//const char cmd_nd = 0x02;
+//
+//// 设置产品的ID号(唯一识别码)
+//const char cmd_set_id = 0x06;
 
 // 浓度
 const QString CONCENTRATION = "concentration";
@@ -33,6 +33,12 @@ const QString NTC_STATUS_3 = "NTC探头短路";
 
 // 软件版本号
 const QString SOFTWARE_VERSION = "software_version";
+
+// 设置产品从机地址
+const QString SLAVE_ADDRESS = "slave_address";
+const QString STATIC_ADDRESS = "static_address";
+
+const unsigned char static_address_value = 0xFF;
 
 // 错误信息
 const QString ERROR_MSG = "errorMsg";
@@ -56,7 +62,7 @@ const unsigned char R32_CMD = 0x04;
 const unsigned char VER_CMD = 0x05;
 const unsigned char SET_ID_CMD = 0x06;
 const unsigned char READ_PRODUCT_CMD = 0x07;
-const unsigned char SET_PRODUCT_ADDR_CMD = 0xFD;
+const unsigned char SET_SLAVE_ADDR_CMD = 0xFD;
 const unsigned char READ_PRODUCT_ADDR_CMD = 0xFE;
 const unsigned char READ_ERROR_CMD = 0xFF;
 
@@ -68,6 +74,8 @@ const QString CMD5_OBJECT_NAME = "cmd5";
 const QString CMD6_OBJECT_NAME = "cmd6";
 const QString CMD7_OBJECT_NAME = "cmd7";
 const QString CMD8_OBJECT_NAME = "cmd8";
+const QString CMD_FD_OBJECT_NAME = "cmd_FD";
+const QString CMD_FE_OBJECT_NAME = "cmd_FE";
 
 
 // 按钮objectName与命令号映射
@@ -77,7 +85,9 @@ const QMap<QString, unsigned char> ObjectNameCmdMap = {
         {CMD3_OBJECT_NAME, NCT_CMD},
         {CMD4_OBJECT_NAME, R32_CMD},
         {CMD5_OBJECT_NAME, VER_CMD},
-        {CMD6_OBJECT_NAME, SET_ID_CMD}
+        {CMD6_OBJECT_NAME, SET_ID_CMD},
+        {CMD_FD_OBJECT_NAME, SET_SLAVE_ADDR_CMD},
+        {CMD_FE_OBJECT_NAME, READ_PRODUCT_ADDR_CMD}
 };
 
 

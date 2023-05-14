@@ -38,7 +38,7 @@ add_executable(r32 src/main.cpp
         src/widget/operatebasewidget.cpp
         src/widget/recvr32datawidget.h
         src/widget/recvr32datawidget.cpp
-        src/widget/sendcmdwidget.cpp)
+        src/widget/sendcmdwidget.cpp src/widget/statuswidget.h src/widget/statuswidget.cpp)
 
 target_link_libraries(r32
         Qt5::Core

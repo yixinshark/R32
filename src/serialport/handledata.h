@@ -36,6 +36,7 @@ private:
     bool addCmd_nd(const QVariantMap &info, QByteArray &data);
     // 添加设置产品ID号的命令数据
     bool addCmd_set_id(const QVariantMap &info, QByteArray &data);
+    bool addCmd_set_slave_address(const QVariantMap &info, QByteArray &data);
 
 // handle recv data
 private:
@@ -51,6 +52,8 @@ private:
     bool readSoftwareVersion(const QByteArray &data, QVariantMap &value);
     // 读取产品ID号
     bool readProductInfo(const QByteArray &data, QVariantMap &value);
+    // 读取产品从机地址
+    bool readSlaveProductAddress(const QByteArray &data, QVariantMap &value);
 
 private:
     unsigned char m_address = 0x00;

@@ -51,6 +51,7 @@ bool SerialPortCom::openSerialPort(const QString &portName, qint32 baudRate, QSe
 void SerialPortCom::closeSerialPort()
 {
     m_serialPort->close();
+    qInfo() << "close serialPort :" << m_serialPort->portName();
 }
 
 bool SerialPortCom::isSerialPortOpen() const
