@@ -14,14 +14,20 @@ public:
     explicit DelayedButton(const QString &text, QWidget *parent = nullptr);
     ~DelayedButton() override;
 
+    void setSelected(bool selected);
+
 signals:
     void delayedClicked();
+
+protected:
+    void paintEvent(QPaintEvent *event) override;
 
 private slots:
     void handleButtonClicked();
 
 private:
     QTimer *m_timer = nullptr;
+    bool m_selected = false;
 };
 
 #endif //R32_DELAYEDBUTTON_H

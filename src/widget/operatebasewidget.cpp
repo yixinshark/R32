@@ -5,12 +5,15 @@
 #include "operatebasewidget.h"
 #include "serialportsettingswidget.h"
 #include "statuswidget.h"
+#include "delayedbutton.h"
 
 #include "../serialport/handledata.h"
 #include "../serialport/serialportcom.h"
+#include "../serialport/constant.h"
 
 #include <QDebug>
 #include <QTimer>
+#include <QEvent>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QSerialPort>
@@ -138,4 +141,43 @@ bool OperateBaseWidget::connectSerialPort()
 void OperateBaseWidget::operateMsg(const QString &msg)
 {
     Q_EMIT operatedMsg(msg);
+}
+
+void OperateBaseWidget::sendDataBtnClicked(const QVariantMap &info)
+{
+    auto *btn = qobject_cast<DelayedButton *>(sender());
+    if (!btn) {
+        return;
+    }
+
+    QString objectName = btn->objectName();
+    if (!ObjectNameCmdMap.contains(objectName)) {
+        qWarning() << "send data btn objectName error:" << objectName;
+        return;
+    }
+
+    int cmd = ObjectNameCmdMap.value(objectName);
+    QByteArray data = m_handleData->getSendData(cmd, info);
+    qInfo() << "send cmd: " << cmd << " data:" << data;
+
+    operateMsg("发送数据:" + data.toHex());
+
+    m_serialPortCom->sendData(data);
+}
+
+bool OperateBaseWidget::eventFilter(QObject *watched, QEvent *event)
+{
+    if(event->type() == QEvent::MouseButtonPress) {
+        auto *delayBtn = qobject_cast<DelayedButton *>(watched);
+        if (delayBtn) {
+            delayBtn->setSelected(true);
+            for (auto *btn : m_delayBtnList) {
+                if (btn && btn != delayBtn) {
+                    btn->setSelected(false);
+                }
+            }
+        }
+    }
+
+    return QObject::eventFilter(watched, event);
 }

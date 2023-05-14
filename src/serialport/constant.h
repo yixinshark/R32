@@ -44,6 +44,9 @@ const unsigned char static_address_value = 0xFF;
 const QString ERROR_MSG = "errorMsg";
 const QString ERROR_MSG_UNKNOWN = "未知错误";
 
+// 结果
+const QString OPT_RESULT = "result";
+
 // 0x00:无错误
 // 0x01:校验和错误
 // 0x02:命令码错误
@@ -61,7 +64,7 @@ const unsigned char NCT_CMD = 0x03;
 const unsigned char R32_CMD = 0x04;
 const unsigned char VER_CMD = 0x05;
 const unsigned char SET_ID_CMD = 0x06;
-const unsigned char READ_PRODUCT_CMD = 0x07;
+const unsigned char READ_PRODUCT_ID_CMD = 0x07;
 const unsigned char SET_SLAVE_ADDR_CMD = 0xFD;
 const unsigned char READ_PRODUCT_ADDR_CMD = 0xFE;
 const unsigned char READ_ERROR_CMD = 0xFF;
@@ -77,7 +80,6 @@ const QString CMD8_OBJECT_NAME = "cmd8";
 const QString CMD_FD_OBJECT_NAME = "cmd_FD";
 const QString CMD_FE_OBJECT_NAME = "cmd_FE";
 
-
 // 按钮objectName与命令号映射
 const QMap<QString, unsigned char> ObjectNameCmdMap = {
         {CMD1_OBJECT_NAME, LD_CMD},
@@ -87,40 +89,8 @@ const QMap<QString, unsigned char> ObjectNameCmdMap = {
         {CMD5_OBJECT_NAME, VER_CMD},
         {CMD6_OBJECT_NAME, SET_ID_CMD},
         {CMD_FD_OBJECT_NAME, SET_SLAVE_ADDR_CMD},
-        {CMD_FE_OBJECT_NAME, READ_PRODUCT_ADDR_CMD}
+        {CMD_FE_OBJECT_NAME, READ_PRODUCT_ADDR_CMD},
+        {CMD7_OBJECT_NAME, READ_PRODUCT_ID_CMD}
 };
-
-
-// 零点标定, 0x01
-const unsigned char cmd_ld[] = {header0, header1, 0x07, 0x00, 0x01, 0x00, 0x00};
-
-// 浓度标定, 0x02
-//const unsigned char cmd_nd[] = {header0, header1, 0x0c, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-
-// 读取NTC的ADC值和温度, 0x03
-const unsigned char cmd_ntc[] = {header0, header1, 0x07, 0x00, 0x03, 0x00, 0x00};
-
-// 读取R32的ADC值和浓度
-const unsigned char cmd_r32[] = {header0, header1, 0x07, 0x00, 0x04, 0x00, 0x00};
-
-// 读取软件版本号
-const unsigned char cmd_ver[] = {header0, header1, 0x07, 0x00, 0x05, 0x00, 0x00};
-
-// 设置产品的ID号(唯一识别码)
-//const unsigned char cmd_set_id[] = {header0, header1, 0x0c, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-
-// 读取产品的ID号(唯一识别码)
-const unsigned char cmd_read_id[] = {header0, header1, 0x07, 0x00, 0x07, 0x00, 0x00};
-
-// 设置产品从机地址(广播)
-const unsigned char cmd_set_addr[] = {header0, header1, 0x08, 0xFF, 0xFD, 0x00, 0x00, 0x00};
-
-// 读取产品从机地址(广播)
-const unsigned char cmd_read_addr[] = {header0, header1, 0x07, 0xFF, 0xFE, 0x00, 0x00};
-
-// 回复错误消息
-const unsigned char errorAck = 0xFF;
-
-
 
 #endif //R32_CONSTANT_H

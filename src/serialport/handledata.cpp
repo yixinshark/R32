@@ -2,8 +2,6 @@
 // Created by zyz on 23-5-11.
 //
 
-// You may need to build the project (run Qt uic code generator) to get "ui_HandleData.h" resolved
-
 #include "handledata.h"
 #include "constant.h"
 
@@ -18,8 +16,10 @@ HandleData::HandleData(QObject *parent)
             {NCT_CMD, &HandleData::read_ntc},
             {R32_CMD, &HandleData::read_r32},
             {VER_CMD, &HandleData::readSoftwareVersion},
-            {READ_PRODUCT_CMD, &HandleData::readProductInfo},
-            {READ_PRODUCT_ADDR_CMD, &HandleData::readSlaveProductAddress}
+            {READ_PRODUCT_ID_CMD, &HandleData::readProductInfo},
+            {READ_PRODUCT_ADDR_CMD, &HandleData::readSlaveProductAddress},
+            {LD_CMD, &HandleData::readOperateResult},
+            {ND_CMD, &HandleData::readOperateResult}
     };
 }
 
@@ -50,7 +50,7 @@ void HandleData::processReceivedData(const QByteArray &data)
         }
 
         // 提取长度
-        int length = static_cast<int>(m_receivedData.at(2));
+        int length = static_cast<unsigned char>(m_receivedData.at(2));
 
         if (m_receivedData.length() < length) // 数据不完整，等待更多数据
             break;
@@ -60,7 +60,7 @@ void HandleData::processReceivedData(const QByteArray &data)
         m_receivedData.remove(0, length);
 
         // 提取命令号和其他内容
-        int command = static_cast<int>(frameData.at(3));
+        int command = static_cast<unsigned char>(frameData.at(3));
         // 4：头部，2：长度，1：命令号1； 6：4+校验和2
         QByteArray otherData = frameData.mid(4, length - 6);
 
@@ -183,8 +183,8 @@ bool HandleData::addCmd_set_id(const QVariantMap &info, QByteArray &data)
 {
     // 添加产品种类
     if (info.contains(PRODUCT_TYPE)) {
-        int type = info.value(PRODUCT_TYPE).toInt();
-        data.append(static_cast<unsigned char>(type));
+        //int type = info.value(PRODUCT_TYPE).toInt();
+        data.append(static_cast<unsigned char>(info.value(PRODUCT_TYPE).toInt()));
     } else {
         qWarning() << "product_type not found";
         return false;
@@ -340,5 +340,12 @@ bool HandleData::readSlaveProductAddress(const QByteArray &data, QVariantMap &va
 
     value.insert(SLAVE_ADDRESS, data[0]);
 
+    return true;
+}
+
+bool HandleData::readOperateResult(const QByteArray &data, QVariantMap &value)
+{
+    // 没有有效字节
+    value.insert(OPT_RESULT, true);
     return true;
 }

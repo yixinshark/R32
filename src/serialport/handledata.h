@@ -54,6 +54,8 @@ private:
     bool readProductInfo(const QByteArray &data, QVariantMap &value);
     // 读取产品从机地址
     bool readSlaveProductAddress(const QByteArray &data, QVariantMap &value);
+    // 读取设置零点标定结果;读取设置零点标定结果
+    bool readOperateResult(const QByteArray &data, QVariantMap &value);
 
 private:
     unsigned char m_address = 0x00;
