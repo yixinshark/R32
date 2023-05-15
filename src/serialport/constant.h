@@ -38,6 +38,9 @@ const QString SOFTWARE_VERSION = "software_version";
 const QString SLAVE_ADDRESS = "slave_address";
 const QString STATIC_ADDRESS = "static_address";
 
+// 发送到地址
+const QString SEND_ADDRESS = "send_address";
+
 const unsigned char static_address_value = 0xFF;
 
 // 错误信息
