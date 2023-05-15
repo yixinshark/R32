@@ -10,6 +10,7 @@ LabelButton::LabelButton(const QString &text, QWidget *parent)
     : QLabel(parent)
 {
     setText(text);
+    setMinimumHeight(30);
     setAlignment(Qt::AlignCenter);
 }
 

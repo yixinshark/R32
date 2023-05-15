@@ -48,7 +48,7 @@ void DelayedButton::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing, true);
     painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::green);
-    painter.drawEllipse(5, 16, 5, 5);
+    painter.drawEllipse(5, this->height()/2 - 2, 5, 5);
 }
 
 void DelayedButton::setSelected(bool selected)

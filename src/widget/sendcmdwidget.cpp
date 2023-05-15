@@ -82,6 +82,7 @@ void SendCmdWidget::initSlaveAddressUI()
 {
     auto *btn = new DelayedButton("设置从机地址", this);
     btn->setObjectName(CMD_FD_OBJECT_NAME);
+    btn->setFixedWidth(120);
     m_delayBtnList.append(btn);
     btn->installEventFilter(this);
     connect(btn, &QPushButton::clicked, this, [this]{

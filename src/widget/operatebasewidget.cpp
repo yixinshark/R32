@@ -160,7 +160,8 @@ void OperateBaseWidget::sendDataBtnClicked(const QVariantMap &info)
     QByteArray data = m_handleData->getSendData(cmd, info);
     qInfo() << "send cmd: " << cmd << " data:" << data;
 
-    operateMsg("发送数据:" + data.toHex());
+    QString msg = QString("%1发送数据:").arg(m_serialPortCom->isSerialPortOpen() ? " " : "串口未打开,未");
+    operateMsg(msg + data.toHex());
 
     m_serialPortCom->sendData(data);
 }

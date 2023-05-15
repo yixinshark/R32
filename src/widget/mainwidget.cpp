@@ -29,7 +29,7 @@ void MainWidget::initUI()
 
     auto *tabWidget = new TabWidget(this);
     QStringList tabs;
-    tabs << "Operation" << "History";
+    tabs << "数据读写操作" << "数据查询";
     tabWidget->addTabs(tabs);
     tabWidget->addWidget(tabs[0], m_operateWidget);
     tabWidget->addWidget(tabs[1], m_historyDataWidget);

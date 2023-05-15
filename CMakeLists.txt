@@ -6,6 +6,10 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+if (WIN32)
+    # 根据自己的地址，如果没配置系统环境
+    set(CMAKE_PREFIX_PATH D:/softeware/Qt/5.15.2/mingw81_64)
+endif ()
 
 find_package(Qt5 COMPONENTS
         Core
@@ -38,7 +42,9 @@ add_executable(r32 src/main.cpp
         src/widget/operatebasewidget.cpp
         src/widget/recvr32datawidget.h
         src/widget/recvr32datawidget.cpp
-        src/widget/sendcmdwidget.cpp src/widget/statuswidget.h src/widget/statuswidget.cpp)
+        src/widget/sendcmdwidget.cpp
+        src/widget/statuswidget.h
+        src/widget/statuswidget.cpp)
 
 target_link_libraries(r32
         Qt5::Core
