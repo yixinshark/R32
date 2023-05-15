@@ -354,19 +354,29 @@ void SendCmdWidget::initSetProductIDUI()
     btn->installEventFilter(this);
     m_delayBtnList.append(btn);
 
+    auto *adLabel = new QLabel("输入地址0x:", this);
+    auto *inputAddress = new QLineEdit(this);
+    inputAddress->setFixedWidth(60);
+
     auto *label = new QLabel("输入ID:", this);
     auto *idInput = new QLineEdit(this);
-    connect(btn, &QPushButton::clicked, this, [this, idInput]{
+    connect(btn, &QPushButton::clicked, this, [this,inputAddress, idInput]{
         m_showSetProductIDResult->clear();
 
         QVariantMap info;
         // TODO id 的类型
         info.insert(PRODUCT_ID, idInput->text().toInt());
+
+        char sendAddress = static_cast<quint8>(inputAddress->text().toInt());
+        info.insert(SEND_ADDRESS, sendAddress);
+
         sendDataBtnClicked(info);
     });
 
     auto *hLayout = new QHBoxLayout();
     hLayout->addWidget(btn);
+    hLayout->addWidget(adLabel);
+    hLayout->addWidget(inputAddress);
     hLayout->addWidget(label);
     hLayout->addWidget(idInput);
     hLayout->addWidget(m_showSetProductIDResult);

@@ -113,7 +113,13 @@ void HandleData::addContent(int cmd, const QVariantMap &info, QByteArray &data)
     data.append(header0);
     data.append(header1);
     data.append(static_cast<char>(0)); // 先用0占位，后面再填充
-    data.append(m_address);
+    // 添加地址
+    // data.append(m_address); // TODO 确认是地址从哪里获取
+    if (info.contains(SEND_ADDRESS))
+        data.append(static_cast<quint8>(info.value(SEND_ADDRESS).toInt()));
+    else
+        data.append(static_cast<quint8>(m_address));
+
     data.append(static_cast<char>(cmd));
 
     switch (cmd) {
@@ -134,7 +140,7 @@ void HandleData::addContent(int cmd, const QVariantMap &info, QByteArray &data)
     }
 
     // 填充长度，+2为校验和2字节
-    data[2] = static_cast<char>(data.length() + 2);
+    data[2] = static_cast<quint8>(data.length() + 2);
 
     addCheckSum(data);
 }
@@ -145,8 +151,8 @@ void HandleData::addCheckSum(QByteArray &data)
     for (int i = 0; i < data.length(); ++i)
         checksum += static_cast<quint8>(data.at(i));
 
-    data.append(static_cast<char>((checksum >> 8) & 0xFF));
-    data.append(static_cast<char>(checksum & 0xFF));
+    data.append(static_cast<quint8>((checksum >> 8) & 0xFF));
+    data.append(static_cast<quint8>(checksum & 0xFF));
 }
 
 bool HandleData::addCmd_nd(const QVariantMap &info, QByteArray &data)
@@ -155,8 +161,8 @@ bool HandleData::addCmd_nd(const QVariantMap &info, QByteArray &data)
     if (info.contains(CONCENTRATION)) {
         int concentration = info.value(CONCENTRATION).toInt();
         // 添加浓度的高8位和低8位
-        data.append(static_cast<char>((concentration >> 8) & 0xFF));
-        data.append(static_cast<char>(concentration & 0xFF));
+        data.append(static_cast<quint8>((concentration >> 8) & 0xFF));
+        data.append(static_cast<quint8>(concentration & 0xFF));
     } else {
         qWarning() << "concentration not found";
         return false;
@@ -170,8 +176,8 @@ bool HandleData::addCmd_nd(const QVariantMap &info, QByteArray &data)
         data.append(temperature >= 0 ? 0x00 : 0x01);
 
         // 添加温度的高8位和低8位
-        data.append(static_cast<char>((temperature >> 8) & 0xFF));
-        data.append(static_cast<char>(temperature & 0xFF));
+        data.append(static_cast<quint8>((temperature >> 8) & 0xFF));
+        data.append(static_cast<quint8>(temperature & 0xFF));
     } else {
         qWarning() << "temperature not found";
         return false;
@@ -195,10 +201,10 @@ bool HandleData::addCmd_set_id(const QVariantMap &info, QByteArray &data)
     if (info.contains(PRODUCT_ID)) {
         int id = info.value(PRODUCT_ID).toInt();
         // 分别添加id的第一个字节，第二个字节，第三个字节，第四个字节
-        data.append(static_cast<char>((id >> 24) & 0xFF));
-        data.append(static_cast<char>((id >> 16) & 0xFF));
-        data.append(static_cast<char>((id >> 8) & 0xFF));
-        data.append(static_cast<char>(id & 0xFF));
+        data.append(static_cast<quint8>((id >> 24) & 0xFF));
+        data.append(static_cast<quint8>((id >> 16) & 0xFF));
+        data.append(static_cast<quint8>((id >> 8) & 0xFF));
+        data.append(static_cast<quint8>(id & 0xFF));
     } else {
         qWarning() << "product_id not found";
         return false;
