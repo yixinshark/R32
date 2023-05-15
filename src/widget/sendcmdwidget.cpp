@@ -22,6 +22,7 @@ SendCmdWidget::SendCmdWidget(QWidget *parent)
     , m_softwareLabel(new QLineEdit(this))
     , m_showSetLDResult(new QLineEdit(this))
     , m_showSetNDResult(new QLineEdit(this))
+    , m_showSetProductIDResult(new QLineEdit(this))
 {
     initUI();
 
@@ -43,6 +44,7 @@ void SendCmdWidget::initUI()
 
     initSlaveAddressUI();
     initReadSlaveAddressUI();
+    initSetProductIDUI();
     initReadProductIDUI();
     initReadSoftVersionUI();
     initSetLDUI();
@@ -67,6 +69,9 @@ void SendCmdWidget::recvAckData(int cmd, const QVariantMap &info)
             break;
         case ND_CMD:
             showSetNDResult(info);
+            break;
+        case SET_ID_CMD:
+            showSetProductIDResult(info);
             break;
         default:
             break;
@@ -297,4 +302,46 @@ void SendCmdWidget::showSetNDResult(const QVariantMap &info)
     bool result = info.value(OPT_RESULT).toBool();
     QString strRes = result ? "浓度标定成功!" : "浓度标定失败!";
     m_showSetLDResult->setText(strRes);
+}
+
+void SendCmdWidget::initSetProductIDUI()
+{
+    m_showSetProductIDResult->setReadOnly(true);
+    m_showSetProductIDResult->setPlaceholderText("显示操作结果");
+    auto *btn = new DelayedButton("设置产品ID号", this);
+    btn->setFixedWidth(120);
+    btn->setObjectName(CMD6_OBJECT_NAME);
+    btn->installEventFilter(this);
+    m_delayBtnList.append(btn);
+
+    auto *label = new QLabel("输入ID:", this);
+    auto *idInput = new QLineEdit(this);
+    connect(btn, &QPushButton::clicked, this, [this, idInput]{
+        m_showSetProductIDResult->clear();
+
+        QVariantMap info;
+        // TODO id 的类型
+        info.insert(PRODUCT_ID, idInput->text().toInt());
+        sendDataBtnClicked(info);
+    });
+
+    auto *hLayout = new QHBoxLayout();
+    hLayout->addWidget(btn);
+    hLayout->addWidget(label);
+    hLayout->addWidget(idInput);
+    hLayout->addWidget(m_showSetProductIDResult);
+
+    m_mainLayout->addLayout(hLayout);
+}
+
+void SendCmdWidget::showSetProductIDResult(const QVariantMap &info)
+{
+    if (!info.contains(OPT_RESULT)) {
+        qWarning() << "show-set product-id result info error:" << info;
+        return;
+    }
+
+    bool result = info.value(OPT_RESULT).toBool();
+    QString strRes = result ? "设置产品ID成功!" : "设置产品ID失败!";
+    m_showSetProductIDResult->setText(strRes);
 }

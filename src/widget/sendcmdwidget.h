@@ -32,6 +32,8 @@ private:
     void initSlaveAddressUI();
     // 读取从机地址
     void initReadSlaveAddressUI();
+    // 设置产品的ID号(唯一识别码)
+    void initSetProductIDUI();
     // 读取产品的ID号(唯一识别码)
     void initReadProductIDUI();
     // 显示读取软件版本号
@@ -48,6 +50,7 @@ private:
     void showSoftwareVersion(const QVariantMap &info);
     void showSetLDResult(const QVariantMap &info);
     void showSetNDResult(const QVariantMap &info);
+    void showSetProductIDResult(const QVariantMap &info);
 
 private:
     QVBoxLayout *m_mainLayout;
@@ -65,6 +68,8 @@ private:
     QLineEdit *m_showSetLDResult;
     // 显示设置浓度标定结果
     QLineEdit *m_showSetNDResult;
+    // 显示读取产品的ID号(唯一识别码)结果
+    QLineEdit *m_showSetProductIDResult;
 };
 
 #endif //R32_SENDCMDWIDGET_H

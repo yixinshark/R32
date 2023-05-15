@@ -19,7 +19,8 @@ HandleData::HandleData(QObject *parent)
             {READ_PRODUCT_ID_CMD, &HandleData::readProductInfo},
             {READ_PRODUCT_ADDR_CMD, &HandleData::readSlaveProductAddress},
             {LD_CMD, &HandleData::readOperateResult},
-            {ND_CMD, &HandleData::readOperateResult}
+            {ND_CMD, &HandleData::readOperateResult},
+            {SET_ID_CMD, &HandleData::readOperateResult}
     };
 }
 
