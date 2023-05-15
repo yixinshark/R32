@@ -61,11 +61,18 @@ void RecvR32DataWidget::initReadNTCInfoUI()
     btn->setObjectName(CMD3_OBJECT_NAME);
     m_delayBtnList.append(btn);
     btn->installEventFilter(this);
-    connect(btn, &DelayedButton::clicked, this, [this]{
+
+    auto *adLabel = new QLabel("输入地址0x:", this);
+    auto *inputAddress = new QLineEdit(this);
+    inputAddress->setFixedWidth(60);
+    connect(btn, &DelayedButton::clicked, this, [this, inputAddress]{
         m_showADCValue->clear();
         m_showTemperatureValue->clear();
 
-        sendDataBtnClicked();
+        char sendAddress = static_cast<quint8>(inputAddress->text().toInt());
+        QVariantMap info;
+        info.insert(SEND_ADDRESS, sendAddress);
+        sendDataBtnClicked(info);
     });
 
     auto *label = new QLabel("ADC值:", this);
@@ -73,6 +80,8 @@ void RecvR32DataWidget::initReadNTCInfoUI()
 
     auto *hLayout = new QHBoxLayout();
     hLayout->addWidget(btn);
+    hLayout->addWidget(adLabel);
+    hLayout->addWidget(inputAddress);
     hLayout->addWidget(label);
     hLayout->addWidget(m_showADCValue);
     hLayout->addWidget(label1);
@@ -88,11 +97,19 @@ void RecvR32DataWidget::initReadR32InfoUI()
     btn->setObjectName(CMD4_OBJECT_NAME);
     m_delayBtnList.append(btn);
     btn->installEventFilter(this);
-    connect(btn, &DelayedButton::delayedClicked, this, [this]{
+
+    auto *adLabel = new QLabel("输入地址0x:", this);
+    auto *inputAddress = new QLineEdit(this);
+    inputAddress->setFixedWidth(60);
+
+    connect(btn, &DelayedButton::delayedClicked, this, [this, inputAddress]{
         m_showR32ADCValue->clear();
         m_showR32NDValue->clear();
 
-        sendDataBtnClicked();
+        char sendAddress = static_cast<quint8>(inputAddress->text().toInt());
+        QVariantMap info;
+        info.insert(SEND_ADDRESS, sendAddress);
+        sendDataBtnClicked(info);
     });
 
     auto *label = new QLabel("ADC值:", this);
@@ -100,6 +117,8 @@ void RecvR32DataWidget::initReadR32InfoUI()
 
     auto *hLayout = new QHBoxLayout();
     hLayout->addWidget(btn);
+    hLayout->addWidget(adLabel);
+    hLayout->addWidget(inputAddress);
     hLayout->addWidget(label);
     hLayout->addWidget(m_showR32ADCValue);
     hLayout->addWidget(label1);

@@ -157,13 +157,23 @@ void SendCmdWidget::initReadProductIDUI()
     btn->setObjectName(CMD7_OBJECT_NAME);
     m_delayBtnList.append(btn);
     btn->installEventFilter(this);
-    connect(btn, &QPushButton::clicked, this, [this]{
+
+    auto *adLabel = new QLabel("输入地址0x:", this);
+    auto *inputAddress = new QLineEdit(this);
+    inputAddress->setFixedWidth(60);
+    connect(btn, &QPushButton::clicked, this, [this, inputAddress]{
         m_productIDLabel->clear();
-        sendDataBtnClicked();
+
+        char sendAddress = static_cast<quint8>(inputAddress->text().toInt());
+        QVariantMap info;
+        info.insert(SEND_ADDRESS, sendAddress);
+        sendDataBtnClicked(info);
     });
 
     auto *hLayout = new QHBoxLayout();
     hLayout->addWidget(btn);
+    hLayout->addWidget(adLabel);
+    hLayout->addWidget(inputAddress);
     hLayout->addWidget(m_productIDLabel);
 
     m_mainLayout->addLayout(hLayout);
@@ -191,13 +201,23 @@ void SendCmdWidget::initReadSoftVersionUI()
     btn->setObjectName(CMD5_OBJECT_NAME);
     m_delayBtnList.append(btn);
     btn->installEventFilter(this);
-    connect(btn, &QPushButton::clicked, this, [this]{
+
+    auto *adLabel = new QLabel("输入地址0x:", this);
+    auto *inputAddress = new QLineEdit(this);
+    inputAddress->setFixedWidth(60);
+    connect(btn, &QPushButton::clicked, this, [this, inputAddress]{
         m_softwareLabel->clear();
-        sendDataBtnClicked();
+
+        char sendAddress = static_cast<quint8>(inputAddress->text().toInt());
+        QVariantMap info;
+        info.insert(SEND_ADDRESS, sendAddress);
+        sendDataBtnClicked(info);
     });
 
     auto *hLayout = new QHBoxLayout();
     hLayout->addWidget(btn);
+    hLayout->addWidget(adLabel);
+    hLayout->addWidget(inputAddress);
     hLayout->addWidget(m_softwareLabel);
 
     m_mainLayout->addLayout(hLayout);
@@ -223,13 +243,24 @@ void SendCmdWidget::initSetLDUI()
     btn->setObjectName(CMD1_OBJECT_NAME);
     m_delayBtnList.append(btn);
     btn->installEventFilter(this);
-    connect(btn, &QPushButton::clicked, this, [this]{
+
+    auto *label = new QLabel("输入地址0x:", this);
+    auto *inputAddress = new QLineEdit(this);
+    inputAddress->setFixedWidth(60);
+    connect(btn, &QPushButton::clicked, this, [this, inputAddress]{
         m_showSetLDResult->clear();
-        sendDataBtnClicked();
+
+        char sendAddress = static_cast<quint8>(inputAddress->text().toInt());
+        QVariantMap info;
+        info.insert(SEND_ADDRESS, sendAddress);
+
+        sendDataBtnClicked(info);
     });
 
     auto *hLayout = new QHBoxLayout();
     hLayout->addWidget(btn);
+    hLayout->addWidget(label);
+    hLayout->addWidget(inputAddress);
     hLayout->addWidget(m_showSetLDResult);
 
     m_mainLayout->addLayout(hLayout);
@@ -257,6 +288,10 @@ void SendCmdWidget::initSetNDUI()
     btn->installEventFilter(this);
     m_delayBtnList.append(btn);
 
+    auto *adLabel = new QLabel("输入地址0x:", this);
+    auto *inputAddress = new QLineEdit(this);
+    inputAddress->setFixedWidth(60);
+
     auto *label = new QLabel("输入浓度值:", this);
     auto *ndInput = new QLineEdit(this);
 
@@ -265,6 +300,8 @@ void SendCmdWidget::initSetNDUI()
 
     auto *hLayout = new QHBoxLayout();
     hLayout->addWidget(btn);
+    hLayout->addWidget(adLabel);
+    hLayout->addWidget(inputAddress);
     hLayout->addWidget(label);
     hLayout->addWidget(ndInput);
     hLayout->addWidget(label1);
@@ -273,7 +310,7 @@ void SendCmdWidget::initSetNDUI()
 
     m_mainLayout->addLayout(hLayout);
 
-    connect(btn, &QPushButton::clicked, this, [this, ndInput, teInput]{
+    connect(btn, &QPushButton::clicked, this, [this, inputAddress, ndInput, teInput]{
         m_showSetNDResult->clear();
 
         qInfo() << "nd:" << ndInput->text() << " temperature:" << teInput->text();
@@ -283,6 +320,9 @@ void SendCmdWidget::initSetNDUI()
         QVariantMap info;
         info.insert(CONCENTRATION, ndInput->text().toInt(&ok));
         info.insert(TEMPERATURE, teInput->text().toDouble(&ok1));
+
+        char sendAddress = static_cast<quint8>(inputAddress->text().toInt());
+        info.insert(SEND_ADDRESS, sendAddress);
 
         if (ok & ok1) {
             sendDataBtnClicked(info);
@@ -314,19 +354,29 @@ void SendCmdWidget::initSetProductIDUI()
     btn->installEventFilter(this);
     m_delayBtnList.append(btn);
 
+    auto *adLabel = new QLabel("输入地址0x:", this);
+    auto *inputAddress = new QLineEdit(this);
+    inputAddress->setFixedWidth(60);
+
     auto *label = new QLabel("输入ID:", this);
     auto *idInput = new QLineEdit(this);
-    connect(btn, &QPushButton::clicked, this, [this, idInput]{
+    connect(btn, &QPushButton::clicked, this, [this,inputAddress, idInput]{
         m_showSetProductIDResult->clear();
 
         QVariantMap info;
         // TODO id 的类型
         info.insert(PRODUCT_ID, idInput->text().toInt());
+
+        char sendAddress = static_cast<quint8>(inputAddress->text().toInt());
+        info.insert(SEND_ADDRESS, sendAddress);
+
         sendDataBtnClicked(info);
     });
 
     auto *hLayout = new QHBoxLayout();
     hLayout->addWidget(btn);
+    hLayout->addWidget(adLabel);
+    hLayout->addWidget(inputAddress);
     hLayout->addWidget(label);
     hLayout->addWidget(idInput);
     hLayout->addWidget(m_showSetProductIDResult);
