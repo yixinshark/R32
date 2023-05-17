@@ -28,6 +28,7 @@ protected:
 private:
     void initUI();
     void updateAvailablePorts() const;
+    void styleForWindows();
 
 private:
     QComboBox *m_portComboBox;

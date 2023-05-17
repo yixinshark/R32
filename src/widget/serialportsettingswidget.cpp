@@ -8,6 +8,7 @@
 #include <QEvent>
 #include <QComboBox>
 #include <QSerialPortInfo>
+#include <QListView>
 
 #include "serialportsettingswidget.h"
 
@@ -19,6 +20,9 @@ SerialPortSettingsWidget::SerialPortSettingsWidget(QWidget *parent)
     , m_dataBitsComboBox(new QComboBox(this))
     , m_stopBitsComboBox(new QComboBox(this))
 {
+#ifdef Q_OS_WIN
+    styleForWindows();
+#endif
     initUI();
 }
 
@@ -159,4 +163,22 @@ bool SerialPortSettingsWidget::eventFilter(QObject *watched, QEvent *event)
     }
 
     return QObject::eventFilter(watched, event);
+}
+
+void SerialPortSettingsWidget::styleForWindows()
+{
+    m_portComboBox->setView(new QListView(this));
+    m_portComboBox->setMinimumHeight(25);
+
+    m_dataBitsComboBox->setView(new QListView(this));
+    m_dataBitsComboBox->setMinimumHeight(25);
+
+    m_baudRateComboBox->setView(new QListView(this));
+    m_baudRateComboBox->setMinimumHeight(25);
+
+    m_parityComboBox->setView(new QListView(this));
+    m_parityComboBox->setMinimumHeight(25);
+
+    m_stopBitsComboBox->setView(new QListView(this));
+    m_stopBitsComboBox->setMinimumHeight(25);
 }

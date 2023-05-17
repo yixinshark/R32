@@ -5,13 +5,19 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-
-    // 初始化数据库连接池
-    Singleton<ConnectionPool>::getInstance();
+    QApplication app(argc, argv);
 
     MainWidget mainWidget;
     mainWidget.show();
 
-    return a.exec();
+#ifdef Q_OS_WIN
+    // qss 文件
+    QFile File(":src/res/r32.qss");
+    File.open(QFile::ReadOnly);
+    QString StyleSheet = QString::fromLatin1(File.readAll());
+    app.setStyleSheet(StyleSheet);
+    File.close();
+#endif
+
+    return app.exec();
 }
