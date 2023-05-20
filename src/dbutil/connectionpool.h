@@ -43,6 +43,7 @@ public:
 
 private:
     bool createDatabase(const QString &databaseName);
+    bool checkDatabaseExistence(QSqlDatabase& db, const QString& databaseName);
     QSqlDatabase createConnection(const QString &connectionName); // 创建数据库连接
     ConnectionPoolPrivate *d;
 };

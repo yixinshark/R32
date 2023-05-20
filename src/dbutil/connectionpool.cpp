@@ -75,14 +75,11 @@ ConnectionPoolPrivate::~ConnectionPoolPrivate() {
  |----------------------------------------------------------------------------*/
 ConnectionPool::ConnectionPool() : d(new ConnectionPoolPrivate) {
     bool ret = createDatabase(d->databaseName);
-    QString runlog = "";
-    if (!ret)
-    {
-        runlog = "create database:" + d->databaseName + " failed!";
-    }
-    else
-    {
-        runlog = "create database:" + d->databaseName + " success!";
+    QString runlog;
+    if (!ret) {
+        runlog = "create or connect database:" + d->databaseName + " failed!";
+    } else {
+        runlog = "create or connect database:" + d->databaseName + " success!";
     }
 
     qDebug() << runlog;
@@ -142,11 +139,11 @@ bool ConnectionPool::createDatabase(const QString &databaseName)
     // 创建一个数据库
     QString connectionName = "connect";
     QSqlDatabase db = QSqlDatabase::addDatabase(d->databaseType, connectionName);
-    db.setHostName(d->hostName);
-    db.setUserName(d->username);
-    db.setPassword(d->password);
+    QString connectString = QString("DRIVER={SQL Server};SERVER=%1;UID=%2;PWD=%3;").arg(d->hostName)
+            .arg(d->username).arg(d->password);
 
-    qInfo() << "--------------database name:" << databaseName << " type:" << d->databaseType;
+    db.setDatabaseName(connectString);
+
     if (d->port != 0) {
         db.setPort(d->port);
     }
@@ -156,25 +153,23 @@ bool ConnectionPool::createDatabase(const QString &databaseName)
         return false;
     }
 
-    qInfo() << "db opened:" << db.isOpen() << " path:" << db.databaseName();
-
-    if (d->databaseType != "QSQLITE") {
-        QString createDBSql = QString("CREATE DATABASE IF NOT EXISTS %1").arg(databaseName);
+    bool ret = checkDatabaseExistence(db, databaseName);
+    qInfo() << "database" << databaseName << " existed:"  << ret;
+    if (!ret) {
+        QString createDBSql = QString("CREATE DATABASE %1").arg(databaseName);
         db.exec(createDBSql);
     }
+
+    QString useR32 = QString ("USE %1").arg(databaseName);
+    db.exec(useR32);
 
     if (db.lastError().isValid()) {
         qDebug() << "Create database failed." << db.lastError();
         return false;
     } else {
-        db.setDatabaseName(databaseName);
-        if (!db.open()) {
-            qDebug() << "Open datatabase error:" << db.lastError().text();
-        } else {
-            ConnectionPoolPrivate::mutex.lock();
-            d->unusedConnectionNames.push(connectionName);
-            ConnectionPoolPrivate::mutex.unlock();
-        }
+        ConnectionPoolPrivate::mutex.lock();
+        d->unusedConnectionNames.push(connectionName);
+        ConnectionPoolPrivate::mutex.unlock();
     }
 
     return true;
@@ -230,4 +225,15 @@ void ConnectionPool::destroy() {
 
         qDebug() << "Destroy connection pool";
     }
+}
+
+bool ConnectionPool::checkDatabaseExistence(QSqlDatabase &db, const QString &databaseName) {
+    QSqlQuery query(db);
+    query.exec("SELECT COUNT(*) FROM sys.databases WHERE name = '" + databaseName + "'");
+    if (query.next()) {
+        int count = query.value(0).toInt();
+        return (count > 0);
+    }
+
+    return false;
 }

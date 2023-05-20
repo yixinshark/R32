@@ -23,21 +23,24 @@ find_package(Qt5 COMPONENTS
 include_directories(${PROJECT_SOURCE_DIR}/src/dbutil)
 include_directories(${PROJECT_SOURCE_DIR}/src/serialport)
 include_directories(${PROJECT_SOURCE_DIR}/src/widget)
+include_directories(${PROJECT_SOURCE_DIR}/src/dbopt)
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/dbutil DBUTILS)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/serialport SERIALPORTS)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/widget WIDGETS)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/dbopt DBOPT)
 
 set(R32_SRCS
         ${DBUTILS}
         ${SERIALPORTS}
         ${WIDGETS}
+        ${DBOPT}
         src/main.cpp
         )
 
 set(QRCS
         ${CMAKE_CURRENT_SOURCE_DIR}/res.qrc
-        )
+    )
 
 add_executable(r32
         ${R32_SRCS}

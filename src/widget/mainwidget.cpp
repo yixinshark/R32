@@ -9,6 +9,7 @@
 
 #include <QVBoxLayout>
 #include <QTabWidget>
+#include "connectionpool.h"
 
 MainWidget::MainWidget(QWidget *parent)
     : QWidget(parent)
@@ -20,7 +21,7 @@ MainWidget::MainWidget(QWidget *parent)
 
 MainWidget::~MainWidget()
 {
-
+    Singleton<ConnectionPool>::getInstance().destroy();
 }
 
 void MainWidget::initUI()
