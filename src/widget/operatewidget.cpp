@@ -23,6 +23,8 @@ OperateWidget::OperateWidget(QWidget *parent)
 
     connect(m_sendCmdWidget, &SendCmdWidget::operatedMsg, this, &OperateWidget::showMsg);
     connect(m_recvR32DataWidget, &RecvR32DataWidget::operatedMsg, this, &OperateWidget::showMsg);
+
+    connect(m_recvR32DataWidget, &RecvR32DataWidget::r32NDValue, m_sendCmdWidget, &SendCmdWidget::setNDValue);
 }
 
 OperateWidget::~OperateWidget()
@@ -33,19 +35,20 @@ OperateWidget::~OperateWidget()
 void OperateWidget::initUI()
 {
     auto *mainLayout = new QVBoxLayout();
+    mainLayout->setSpacing(20);
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
     // 添加一个groupbox
-    auto *groupBox = new QGroupBox(tr("指令操作"), this);
+    auto *groupBox = new QGroupBox(tr("R32传感器"), this);
 
     auto *vLayout = new QHBoxLayout();
-    vLayout->setContentsMargins(0, 0, 0, 0);
+    vLayout->setContentsMargins(0, 0, 0, 10);
     vLayout->addWidget(m_sendCmdWidget);
     groupBox->setLayout(vLayout);
     mainLayout->addWidget(groupBox);
 
     // 添加一个groupbox
-    auto *r32GroupBox = new QGroupBox(tr("R32数据"), this);
+    auto *r32GroupBox = new QGroupBox(tr("R32分析仪"), this);
 
     auto *r32VLayout = new QHBoxLayout();
     r32VLayout->setContentsMargins(0, 0, 0, 0);

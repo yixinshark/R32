@@ -13,10 +13,13 @@ TabWidget::TabWidget(QWidget *parent)
     , m_titleLayout(new QHBoxLayout())
     , m_stackedLayout(new QStackedLayout())
 {
-    QVBoxLayout *mainLayout = new QVBoxLayout();
+    m_titleLayout->setSpacing(3);
+
+    auto *mainLayout = new QVBoxLayout();
     mainLayout->setContentsMargins(5, 0, 5, 0);
     mainLayout->addLayout(m_titleLayout);
     mainLayout->addLayout(m_stackedLayout);
+    mainLayout->setSpacing(20);
     setLayout(mainLayout);
 }
 
@@ -28,8 +31,8 @@ void TabWidget::addTabs(const QStringList &tabs)
 {
     for (const QString &tab : tabs) {
         auto* label = new LabelButton(tab, this);
-//        label->setAlignment(Qt::AlignCenter);
-//        label->setAutoFillBackground(true);
+        //label->setAlignment(Qt::AlignCenter);
+        //label->setAutoFillBackground(true);
         label->installEventFilter(this);
         m_titleLayout->addWidget(label);
         m_tabLabelMap.insert(tab, label);

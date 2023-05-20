@@ -18,7 +18,8 @@ SerialPortCom::SerialPortCom(QObject *parent)
 
 SerialPortCom::~SerialPortCom()
 {
-    closeSerialPort();
+    if (!m_serialPort->portName().isEmpty())
+        closeSerialPort();
 }
 
 bool SerialPortCom::openSerialPort(const QString &portName, qint32 baudRate, QSerialPort::DataBits dataBits,

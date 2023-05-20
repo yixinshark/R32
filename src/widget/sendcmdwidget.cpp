@@ -17,8 +17,9 @@ SendCmdWidget::SendCmdWidget(QWidget *parent)
     : OperateBaseWidget(parent)
     , m_mainLayout(new QVBoxLayout(this))
     , m_inputSlaveAddress(new QLineEdit(this))
-    , m_slaveAddressLabel(new QLineEdit(this))
-    , m_productIDLabel(new QLineEdit(this))
+    , m_inputSlaveAddressResult(new QLineEdit(this))
+    , m_ndInput(new QLineEdit(this))
+    , m_temperatureInput(new QLineEdit(this))
     , m_softwareLabel(new QLineEdit(this))
     , m_showSetLDResult(new QLineEdit(this))
     , m_showSetNDResult(new QLineEdit(this))
@@ -27,6 +28,7 @@ SendCmdWidget::SendCmdWidget(QWidget *parent)
     initUI();
 
     connect(m_handleData, &HandleData::frameReceived, this, &SendCmdWidget::recvAckData);
+    connect(this, &SendCmdWidget::ntcTemperatureValue, this, &SendCmdWidget::setNTCTemperature);
 }
 
 SendCmdWidget::~SendCmdWidget()
@@ -43,16 +45,20 @@ void SendCmdWidget::initUI()
     m_mainLayout->addLayout(layout);
 
     initSlaveAddressUI();
-    initReadSlaveAddressUI();
+    //initReadSlaveAddressUI();
     initSetProductIDUI();
-    initReadProductIDUI();
+    //initReadProductIDUI();
     initReadSoftVersionUI();
     initSetLDUI();
     initSetNDUI();
+    m_mainLayout->addLayout(initReadNTCInfoUI());
+    m_mainLayout->addLayout(initReadR32InfoUI("R32采样"));
 }
 
 void SendCmdWidget::recvAckData(int cmd, const QVariantMap &info)
 {
+    OperateBaseWidget::recvAckData(cmd, info);
+
     qInfo() << Q_FUNC_INFO << cmd << info;
     switch (cmd) {
         case READ_PRODUCT_ADDR_CMD:
@@ -65,13 +71,13 @@ void SendCmdWidget::recvAckData(int cmd, const QVariantMap &info)
             showSoftwareVersion(info);
             break;
         case LD_CMD:
-            showSetLDResult(info);
+            showOperateResult(info, m_showSetLDResult);
             break;
         case ND_CMD:
-            showSetNDResult(info);
+            showOperateResult(info, m_showSetNDResult);
             break;
         case SET_ID_CMD:
-            showSetProductIDResult(info);
+            showOperateResult(info, m_showSetProductIDResult);
             break;
         default:
             break;
@@ -81,6 +87,7 @@ void SendCmdWidget::recvAckData(int cmd, const QVariantMap &info)
 void SendCmdWidget::initSlaveAddressUI()
 {
     auto *btn = new DelayedButton("设置从机地址", this);
+    m_inputSlaveAddressResult->setPlaceholderText("显示操作结果");
     btn->setObjectName(CMD_FD_OBJECT_NAME);
     btn->setFixedWidth(120);
     m_delayBtnList.append(btn);
@@ -105,18 +112,22 @@ void SendCmdWidget::initSlaveAddressUI()
         sendDataBtnClicked(info);
     });
 
-    auto *label = new QLabel("输入地址0x:", this);
+    auto *label = new QLabel("输入地址0X:", this);
+    auto *label1 = new QLabel("操作结果:", this);
+    m_inputSlaveAddressResult->setReadOnly(true);
 
     auto *hLayout = new QHBoxLayout();
     hLayout->addWidget(btn);
     hLayout->addWidget(label);
     hLayout->addWidget(m_inputSlaveAddress);
-
+    hLayout->addWidget(label1);
+    hLayout->addWidget(m_inputSlaveAddressResult);
     m_mainLayout->addLayout(hLayout);
 }
 
 void SendCmdWidget::initReadSlaveAddressUI()
 {
+    m_slaveAddressLabel = new QLineEdit(this);
     m_slaveAddressLabel->setReadOnly(true);
     auto *btn = new DelayedButton("读取从机地址", this);
     btn->setFixedWidth(120);
@@ -152,6 +163,7 @@ void SendCmdWidget::showProductSlaveAddress(const QVariantMap &info)
 
 void SendCmdWidget::initReadProductIDUI()
 {
+    m_productIDLabel = new QLineEdit(this);
     m_productIDLabel->setReadOnly(true);
     auto *btn = new DelayedButton("读取产品ID", this);
     btn->setFixedWidth(120);
@@ -187,6 +199,7 @@ void SendCmdWidget::showProductID(const QVariantMap &info)
 void SendCmdWidget::initReadSoftVersionUI()
 {
     m_softwareLabel->setReadOnly(true);
+    m_softwareLabel->setPlaceholderText("显示软件版本号");
     auto *btn = new DelayedButton("读取软件版本号", this);
     btn->setFixedWidth(120);
     btn->setObjectName(CMD5_OBJECT_NAME);
@@ -197,8 +210,10 @@ void SendCmdWidget::initReadSoftVersionUI()
         sendDataBtnClicked();
     });
 
+    auto *lable1 = new QLabel("软件版本号:", this);
     auto *hLayout = new QHBoxLayout();
     hLayout->addWidget(btn);
+    hLayout->addWidget(lable1);
     hLayout->addWidget(m_softwareLabel);
 
     m_mainLayout->addLayout(hLayout);
@@ -229,23 +244,13 @@ void SendCmdWidget::initSetLDUI()
         sendDataBtnClicked();
     });
 
+    auto *label = new QLabel("操作结果:", this);
     auto *hLayout = new QHBoxLayout();
     hLayout->addWidget(btn);
+    hLayout->addWidget(label);
     hLayout->addWidget(m_showSetLDResult);
 
     m_mainLayout->addLayout(hLayout);
-}
-
-void SendCmdWidget::showSetLDResult(const QVariantMap &info)
-{
-    if (!info.contains(OPT_RESULT)) {
-        qWarning() << "show-set ld result info error:" << info;
-        return;
-    }
-
-    bool result = info.value(OPT_RESULT).toBool();
-    QString strRes = result ? "零点标定成功!" : "零点标定失败!";
-    m_showSetLDResult->setText(strRes);
 }
 
 void SendCmdWidget::initSetNDUI()
@@ -259,31 +264,28 @@ void SendCmdWidget::initSetNDUI()
     m_delayBtnList.append(btn);
 
     auto *label = new QLabel("输入浓度值:", this);
-    auto *ndInput = new QLineEdit(this);
-
     auto *label1 = new QLabel("输入温度值:", this);
-    auto *teInput = new QLineEdit(this);
 
     auto *hLayout = new QHBoxLayout();
     hLayout->addWidget(btn);
     hLayout->addWidget(label);
-    hLayout->addWidget(ndInput);
+    hLayout->addWidget(m_ndInput);
     hLayout->addWidget(label1);
-    hLayout->addWidget(teInput);
+    hLayout->addWidget(m_temperatureInput);
     hLayout->addWidget(m_showSetNDResult);
 
     m_mainLayout->addLayout(hLayout);
 
-    connect(btn, &QPushButton::clicked, this, [this, ndInput, teInput]{
+    connect(btn, &QPushButton::clicked, this, [this]{
         m_showSetNDResult->clear();
 
-        qInfo() << "nd:" << ndInput->text() << " temperature:" << teInput->text();
+        qInfo() << "nd:" << m_ndInput->text() << " temperature:" << m_temperatureInput->text();
 
         bool ok = false;
         bool ok1 = false;
         QVariantMap info;
-        info.insert(CONCENTRATION, ndInput->text().toInt(&ok));
-        info.insert(TEMPERATURE, teInput->text().toDouble(&ok1));
+        info.insert(CONCENTRATION, static_cast<quint16>(m_ndInput->text().toInt(&ok)));
+        info.insert(TEMPERATURE, m_temperatureInput->text().toDouble(&ok1));
 
         if (ok & ok1) {
             sendDataBtnClicked(info);
@@ -291,18 +293,6 @@ void SendCmdWidget::initSetNDUI()
          m_showSetNDResult->setText("浓度值或者温度值输入有误,请重新输入!");
         }
     });
-}
-
-void SendCmdWidget::showSetNDResult(const QVariantMap &info)
-{
-    if (!info.contains(OPT_RESULT)) {
-        qWarning() << "show-set nd result info error:" << info;
-        return;
-    }
-
-    bool result = info.value(OPT_RESULT).toBool();
-    QString strRes = result ? "浓度标定成功!" : "浓度标定失败!";
-    m_showSetLDResult->setText(strRes);
 }
 
 void SendCmdWidget::initSetProductIDUI()
@@ -326,23 +316,35 @@ void SendCmdWidget::initSetProductIDUI()
         sendDataBtnClicked(info);
     });
 
+    auto *label1 = new QLabel("操作结果:", this);
     auto *hLayout = new QHBoxLayout();
     hLayout->addWidget(btn);
     hLayout->addWidget(label);
     hLayout->addWidget(idInput);
+    hLayout->addWidget(label1);
     hLayout->addWidget(m_showSetProductIDResult);
 
     m_mainLayout->addLayout(hLayout);
 }
 
-void SendCmdWidget::showSetProductIDResult(const QVariantMap &info)
+void SendCmdWidget::showOperateResult(const QVariantMap &info, QLineEdit *resultEdit)
 {
     if (!info.contains(OPT_RESULT)) {
-        qWarning() << "show-set product-id result info error:" << info;
+        qWarning() << "show-operate result info error:" << info;
         return;
     }
 
     bool result = info.value(OPT_RESULT).toBool();
-    QString strRes = result ? "设置产品ID成功!" : "设置产品ID失败!";
-    m_showSetProductIDResult->setText(strRes);
+    QString strRes = result ? "操作成功!" : "操作失败!";
+    resultEdit->setText(strRes);
+}
+
+void SendCmdWidget::setNDValue(quint16 nd)
+{
+    m_ndInput->setText(QString::number(nd));
+}
+
+void SendCmdWidget::setNTCTemperature(const QString &temperture)
+{
+    m_temperatureInput->setText(temperture);
 }

@@ -22,6 +22,10 @@ public:
     explicit SendCmdWidget(QWidget *parent = nullptr);
     ~SendCmdWidget() override;
 
+public slots:
+    void setNDValue(quint16 nd);
+    void setNTCTemperature(const QString &temperture);
+
 protected:
     void recvAckData(int cmd, const QVariantMap &info);
 
@@ -48,20 +52,24 @@ private:
     void showProductSlaveAddress(const QVariantMap &info);
     void showProductID(const QVariantMap &info);
     void showSoftwareVersion(const QVariantMap &info);
-    void showSetLDResult(const QVariantMap &info);
-    void showSetNDResult(const QVariantMap &info);
-    void showSetProductIDResult(const QVariantMap &info);
+    void showOperateResult(const QVariantMap &info, QLineEdit *resultEdit);
 
 private:
     QVBoxLayout *m_mainLayout;
 
     // 输入从机地址框
     QLineEdit *m_inputSlaveAddress;
+    QLineEdit *m_inputSlaveAddressResult;
+
+    // 浓度输入
+    QLineEdit *m_ndInput;
+    // 温度输入
+    QLineEdit *m_temperatureInput;
 
     // 显示从机地址
-    QLineEdit *m_slaveAddressLabel;
+    QLineEdit *m_slaveAddressLabel = nullptr;
     // 显示产品的ID号(唯一识别码)
-    QLineEdit *m_productIDLabel;
+    QLineEdit *m_productIDLabel = nullptr;
     // 显示软件版本
     QLineEdit *m_softwareLabel;
     // 显示设置零点标定结果

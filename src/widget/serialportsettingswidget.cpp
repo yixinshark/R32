@@ -36,7 +36,7 @@ void SerialPortSettingsWidget::initUI()
     auto *mainLayout = new QVBoxLayout();
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
-    auto *titleLabel = new QLabel("串口设置", this);
+    auto *titleLabel = new QLabel(" ", this);
     titleLabel->setAlignment(Qt::AlignCenter);
     mainLayout->addWidget(titleLabel);
 
@@ -169,6 +169,7 @@ void SerialPortSettingsWidget::styleForWindows()
 {
     m_portComboBox->setView(new QListView(this));
     m_portComboBox->setMinimumHeight(25);
+    m_portComboBox->setMinimumWidth(80);
 
     m_dataBitsComboBox->setView(new QListView(this));
     m_dataBitsComboBox->setMinimumHeight(25);

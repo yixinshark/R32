@@ -31,6 +31,12 @@ QPushButton:pressed {
     background-color: #A0A0A0;
 }
 
+QGroupBox::title {
+    font-size: 16px;
+    font-weight: bold;
+    color: rgba(0, 0, 255, 100);
+}
+
 QLineEdit {
     /* 设置文本框的背景颜色 */
     background-color: #F5F5F5;
@@ -40,20 +46,14 @@ QLineEdit {
 
     /* 设置文本框的文本颜色 */
     color: #000000;
-
-    /* 设置文本框的边框样式 */
-    border-style: solid;
-    border-width: 1px;
-    border-color: #CCCCCC;
-
-    /* 设置文本框的圆角半径 */
+    border: 1px solid #CCCCCC;
     border-radius: 5px;
 
     /* 设置文本框的内边距 */
     padding: 2px 5px;
 
     /* 设置文本框的字体 */
-    font-size: 12px;
+    font-size: 15px;
 }
 
 QLineEdit:focus {
@@ -73,86 +73,58 @@ QLineEdit[readOnly="true"]:focus {
     outline: none;
 }
 
-QComboBox{
-      color:#666666;
-      font-size:14px;
-      padding: 1px 3px 1px 3px;
-      border:1px solid rgba(228,228,228,1);
-      border-radius:5px 5px 0px 0px;
+QComboBox {
+    color: #666666;
+    font-size: 14px;
+    padding: 1px 3px;
+    border: 1px solid rgba(228, 228, 228, 1);
+    border-radius: 5px;
 }
 
 QComboBox::down-arrow {
-      image: url(:/src/res/down.png);
-      width: 16px; /* 设置宽度 */
-      height: 16px; /* 设置高度 */
+    image: url(:/src/res/down.png);
+    width: 16px;
+    height: 16px;
 }
 
 QComboBox::drop-down {
-      subcontrol-origin: padding;
-      subcontrol-position: top right;
-      width: 15px;
-      border:none;
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 15px;
+    border: none;
 }
 
-QComboBox QAbstractItemView{
-	background:rgba(255,255,255,1);
-    border:1px solid rgba(228,228,228,1);
-    border-radius:0px 0px 5px 5px;
-	font-size:14px;
-    outline: 0px;  //去虚线
+QComboBox QAbstractItemView {
+    background: rgba(255, 255, 255, 1);
+    border: 1px solid rgba(228, 228, 228, 1);
+    border-radius: 0px 0px 5px 5px;
+    font-size: 14px;
+    outline: 0px;
 }
 
-QComboBox QAbstractItemView::item{
-	height:36px;
-	color:#666666;
-	padding-left:9px;
-	background-color:#FFFFFF;
+QComboBox QAbstractItemView::item {
+    height: 36px;
+    color: #666666;
+    padding-left: 9px;
+    background-color: #FFFFFF;
 }
-QComboBox QAbstractItemView::item:hover{ //悬浮
-      background-color:#409CE1;
-      color:#ffffff;
+
+QComboBox QAbstractItemView::item:hover {
+    background-color: #409CE1;
+    color: #FFFFFF;
 }
-QComboBox QAbstractItemView::item:selected{//选中
-      background-color:#409CE1;
-      color:#ffffff;
+
+QComboBox QAbstractItemView::item:selected {
+    background-color: #409CE1;
+    color: #FFFFFF;
 }
 
 QComboBox:on {
-      padding-top: 3px;
-      padding-left: 4px;
-  }
-
-  QComboBox::down-arrow:on {
-      top: 1px;
-      left: 1px;
+    padding-top: 3px;
+    padding-left: 4px;
 }
 
-QLabel {
-    /* 设置标签的背景颜色 */
-    background-color: #F5F5F5;
-
-    /* 设置标签的文本颜色 */
-    color: #000000;
-
-    /* 设置标签的边框样式 */
-    border: 1px solid #CCCCCC;
-
-    /* 设置标签的圆角半径 */
-    border-radius: 5px;
-
-    /* 设置标签的内边距 */
-    padding: 2px 5px;
-
-    /* 设置标签的对齐方式 */
-    alignment: center;
-}
-
-QLabel:hover {
-    /* 设置标签的悬停状态样式 */
-    background-color: #E0E0E0;
-}
-
-QLabel:pressed {
-    /* 设置标签的按下状态样式 */
-    background-color: #D0D0D0;
+QComboBox::down-arrow:on {
+    top: 1px;
+    left: 1px;
 }

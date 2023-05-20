@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QFile>
 
 #include "widget/mainwidget.h"
 #include "dbutil/connectionpool.h"
