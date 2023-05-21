@@ -18,6 +18,7 @@ find_package(Qt5 COMPONENTS
         Xml
         Sql
         SerialPort
+        AxContainer
         REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR}/src/dbutil)
@@ -54,4 +55,5 @@ target_link_libraries(r32
         Qt5::Xml
         Qt5::Sql
         Qt5::SerialPort
+        Qt5::AxContainer
         )

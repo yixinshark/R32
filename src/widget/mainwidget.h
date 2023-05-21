@@ -7,7 +7,7 @@
 
 #include <QWidget>
 
-class HistoryDataWidget;
+class QueryWidget;
 class OperateWidget;
 
 class MainWidget : public QWidget
@@ -22,7 +22,7 @@ private:
     void initUI();
 
 private:
-    HistoryDataWidget *m_historyDataWidget = nullptr;
+    QueryWidget *m_queryWidget = nullptr;
     OperateWidget *m_operateWidget = nullptr;
 };
 
