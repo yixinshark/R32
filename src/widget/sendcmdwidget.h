@@ -12,6 +12,7 @@
 class QLabel;
 class QLineEdit;
 class QVBoxLayout;
+class StepsWidget;
 
 class DelayedButton;
 
@@ -56,6 +57,7 @@ private:
 
 private:
     QVBoxLayout *m_mainLayout;
+    StepsWidget *m_stepsWidget;
 
     // 输入从机地址框
     QLineEdit *m_inputSlaveAddress;

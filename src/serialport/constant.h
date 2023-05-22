@@ -60,7 +60,7 @@ const QMap<char, QString> errorMsg = {
 // 命令号
 const unsigned char LD_CMD = 0x01;
 const unsigned char ND_CMD = 0x02;
-const unsigned char NCT_CMD = 0x03;
+const unsigned char NTC_CMD = 0x03;
 const unsigned char R32_CMD = 0x04;
 const unsigned char VER_CMD = 0x05;
 const unsigned char SET_ID_CMD = 0x06;
@@ -68,6 +68,9 @@ const unsigned char READ_PRODUCT_ID_CMD = 0x07;
 const unsigned char SET_SLAVE_ADDR_CMD = 0xFD;
 const unsigned char READ_PRODUCT_ADDR_CMD = 0xFE;
 const unsigned char READ_ERROR_CMD = 0xFF;
+
+// 自定义，记录数据库
+const unsigned char RECORD_DATA = 0x99;
 
 const QString CMD1_OBJECT_NAME = "cmd1";
 const QString CMD2_OBJECT_NAME = "cmd2";
@@ -84,7 +87,7 @@ const QString CMD_FE_OBJECT_NAME = "cmd_FE";
 const QMap<QString, unsigned char> ObjectNameCmdMap = {
         {CMD1_OBJECT_NAME, LD_CMD},
         {CMD2_OBJECT_NAME, ND_CMD},
-        {CMD3_OBJECT_NAME, NCT_CMD},
+        {CMD3_OBJECT_NAME, NTC_CMD},
         {CMD4_OBJECT_NAME, R32_CMD},
         {CMD5_OBJECT_NAME, VER_CMD},
         {CMD6_OBJECT_NAME, SET_ID_CMD},

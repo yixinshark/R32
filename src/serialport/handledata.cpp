@@ -13,7 +13,7 @@ HandleData::HandleData(QObject *parent)
 {
      m_readFuncMap = {
             {READ_ERROR_CMD, &HandleData::readErrorAck},
-            {NCT_CMD, &HandleData::read_ntc},
+            {NTC_CMD, &HandleData::read_ntc},
             {R32_CMD, &HandleData::read_r32},
             {VER_CMD, &HandleData::readSoftwareVersion},
             {READ_PRODUCT_ID_CMD, &HandleData::readProductInfo},

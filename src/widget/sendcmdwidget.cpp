@@ -3,10 +3,11 @@
 //
 
 #include "sendcmdwidget.h"
-#include "../serialport/handledata.h"
-#include "../serialport/constant.h"
-#include "../serialport/serialportcom.h"
+#include "handledata.h"
+#include "constant.h"
+#include "serialportcom.h"
 #include "delayedbutton.h"
+#include "stepswidget.h"
 
 #include <QDebug>
 #include <QLineEdit>
@@ -16,6 +17,7 @@
 SendCmdWidget::SendCmdWidget(QWidget *parent)
     : OperateBaseWidget(parent)
     , m_mainLayout(new QVBoxLayout(this))
+    , m_stepsWidget(new StepsWidget(this))
     , m_inputSlaveAddress(new QLineEdit(this))
     , m_inputSlaveAddressResult(new QLineEdit(this))
     , m_ndInput(new QLineEdit(this))
@@ -43,6 +45,7 @@ void SendCmdWidget::initUI()
 
     auto *layout = initSerialPortUI();
     m_mainLayout->addLayout(layout);
+    m_mainLayout->addWidget(m_stepsWidget);
 
     initSlaveAddressUI();
     //initReadSlaveAddressUI();
@@ -50,8 +53,8 @@ void SendCmdWidget::initUI()
     //initReadProductIDUI();
     initReadSoftVersionUI();
     initSetLDUI();
-    initSetNDUI();
     m_mainLayout->addLayout(initReadNTCInfoUI());
+    initSetNDUI();
     m_mainLayout->addLayout(initReadR32InfoUI("R32采样"));
 }
 

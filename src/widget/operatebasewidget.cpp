@@ -257,7 +257,7 @@ void OperateBaseWidget::recvAckData(int cmd, const QVariantMap &info)
 {
     qInfo() << Q_FUNC_INFO << cmd << info;
     switch (cmd) {
-        case NCT_CMD:
+        case NTC_CMD:
             showNTCInfo(info);
             break;
         case R32_CMD:
