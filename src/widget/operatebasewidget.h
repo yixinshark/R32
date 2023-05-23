@@ -25,6 +25,7 @@ public:
     ~OperateBaseWidget() override;
 
 signals:
+    void cmdCompleted(quint8 cmd);
     void operatedMsg(const QString &msg);
     // 分析仪浓度值
     void r32NDValue(quint16 nd);
@@ -41,11 +42,11 @@ protected:
     // 点击按钮，发送对应的命令
     void sendDataBtnClicked(const QVariantMap &info = QVariantMap());
 
-    virtual void recvAckData(int cmd, const QVariantMap &info);
+    virtual void recvAckData(quint8 cmd, const QVariantMap &info);
     void operateMsg(const QString &msg);
 
-    void showNTCInfo(const QVariantMap &info);
-    void showR32Info(const QVariantMap &info);
+    void showNTCInfo(quint8 cmd, const QVariantMap &info);
+    void showR32Info(quint8 cmd, const QVariantMap &info);
 
 private:
     bool connectSerialPort();

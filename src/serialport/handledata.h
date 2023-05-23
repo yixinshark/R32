@@ -18,10 +18,11 @@ public:
     explicit HandleData(QObject *parent = nullptr);
     ~HandleData() override;
 
+    void setSlaveAddress(quint8 slaveAddress);
     QByteArray getSendData(int cmd, const QVariantMap &info);
 
 signals:
-    void frameReceived(int cmd, const QVariantMap &info);
+    void frameReceived(quint8 cmd, const QVariantMap &info);
     void recvedFrameData(const QByteArray &frameData);
 
 public slots:
@@ -62,7 +63,7 @@ private:
     QByteArray m_receivedData;
 
     typedef bool (HandleData::*readFunc)(const QByteArray &data, QVariantMap &value);
-    QMap<int, readFunc> m_readFuncMap;
+    QMap<quint8 , readFunc> m_readFuncMap;
 };
 
 #endif //R32_HANDLEDATA_H

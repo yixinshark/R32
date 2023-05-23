@@ -6,6 +6,7 @@
 #define R32_SENDCMDWIDGET_H
 
 #include "operatebasewidget.h"
+#include "r32recordvalue.h"
 
 #include <QVariantMap>
 
@@ -28,7 +29,7 @@ public slots:
     void setNTCTemperature(const QString &temperture);
 
 protected:
-    void recvAckData(int cmd, const QVariantMap &info);
+    void recvAckData(quint8 cmd, const QVariantMap &info);
 
 private:
     void initUI();
@@ -50,10 +51,14 @@ private:
     void initSetNDUI();
 
 private:
-    void showProductSlaveAddress(const QVariantMap &info);
-    void showProductID(const QVariantMap &info);
-    void showSoftwareVersion(const QVariantMap &info);
-    void showOperateResult(const QVariantMap &info, QLineEdit *resultEdit);
+    void showProductSlaveAddress(quint8 cmd, const QVariantMap &info);
+    void showProductID(quint8 cmd, const QVariantMap &info);
+    void showSoftwareVersion(quint8 cmd, const QVariantMap &info);
+    void showOperateResult(quint8 cmd, const QVariantMap &info, QLineEdit *resultEdit);
+    void stepCompleted(quint8 cmd);
+
+private:
+    R32RecordValue m_r32RecordValue;
 
 private:
     QVBoxLayout *m_mainLayout;
@@ -63,6 +68,7 @@ private:
     QLineEdit *m_inputSlaveAddress;
     QLineEdit *m_inputSlaveAddressResult;
 
+    QLineEdit *m_setProductIDInput;
     // 浓度输入
     QLineEdit *m_ndInput;
     // 温度输入

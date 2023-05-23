@@ -20,7 +20,8 @@ HandleData::HandleData(QObject *parent)
             {READ_PRODUCT_ADDR_CMD, &HandleData::readSlaveProductAddress},
             {LD_CMD, &HandleData::readOperateResult},
             {ND_CMD, &HandleData::readOperateResult},
-            {SET_ID_CMD, &HandleData::readOperateResult}
+            {SET_ID_CMD, &HandleData::readOperateResult},
+            {SET_SLAVE_ADDR_CMD, &HandleData::readOperateResult}
     };
 }
 
@@ -61,7 +62,7 @@ void HandleData::processReceivedData(const QByteArray &data)
         m_receivedData.remove(0, length);
 
         // 提取命令号和其他内容
-        int command = static_cast<unsigned char>(frameData.at(3));
+        quint8 command = static_cast<unsigned char>(frameData.at(3));
         // 4：头部，2：长度，1：命令号1； 6：4+校验和2
         QByteArray otherData = frameData.mid(4, length - 6);
 
@@ -112,9 +113,9 @@ void HandleData::addContent(int cmd, const QVariantMap &info, QByteArray &data)
 {
     data.append(header0);
     data.append(header1);
-    data.append(static_cast<char>(0)); // 先用0占位，后面再填充
+    data.append(static_cast<quint8>(0)); // 先用0占位，后面再填充
     data.append(m_address);
-    data.append(static_cast<char>(cmd));
+    data.append(static_cast<quint8>(cmd));
 
     switch (cmd) {
         case ND_CMD:
@@ -134,7 +135,7 @@ void HandleData::addContent(int cmd, const QVariantMap &info, QByteArray &data)
     }
 
     // 填充长度，+2为校验和2字节
-    data[2] = static_cast<char>(data.length() + 2);
+    data[2] = static_cast<quint8>(data.length() + 2);
 
     addCheckSum(data);
 }
@@ -349,4 +350,9 @@ bool HandleData::readOperateResult(const QByteArray &data, QVariantMap &value)
     // 没有有效字节
     value.insert(OPT_RESULT, true);
     return true;
+}
+
+void HandleData::setSlaveAddress(quint8 slaveAddress)
+{
+    m_address = slaveAddress;
 }

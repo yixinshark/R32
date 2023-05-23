@@ -253,20 +253,20 @@ QLayout *OperateBaseWidget::initReadR32InfoUI(const QString &btnTitle)
     return hLayout;
 }
 
-void OperateBaseWidget::recvAckData(int cmd, const QVariantMap &info)
+void OperateBaseWidget::recvAckData(quint8 cmd, const QVariantMap &info)
 {
     qInfo() << Q_FUNC_INFO << cmd << info;
     switch (cmd) {
         case NTC_CMD:
-            showNTCInfo(info);
+            showNTCInfo(cmd, info);
             break;
         case R32_CMD:
-            showR32Info(info);
+            showR32Info(cmd, info);
             break;
     }
 }
 
-void OperateBaseWidget::showNTCInfo(const QVariantMap &info)
+void OperateBaseWidget::showNTCInfo(quint8 cmd, const QVariantMap &info)
 {
     if (!info.contains(ADC_VALUE) || !info.contains(TEMPERATURE)) {
         qWarning() << "show-read-NTC-info error:" << info;
@@ -277,9 +277,10 @@ void OperateBaseWidget::showNTCInfo(const QVariantMap &info)
 
     m_showADCValue->setText(info[ADC_VALUE].toString());
     m_showTemperatureValue->setText(info[TEMPERATURE].toString());
+    Q_EMIT cmdCompleted(cmd);
 }
 
-void OperateBaseWidget::showR32Info(const QVariantMap &info)
+void OperateBaseWidget::showR32Info(quint8 cmd, const QVariantMap &info)
 {
     if (!info.contains(ADC_VALUE) || !info.contains(CONCENTRATION)) {
         qWarning() << "show-read-R32-info error:" << info;
@@ -290,4 +291,5 @@ void OperateBaseWidget::showR32Info(const QVariantMap &info)
 
     m_showR32ADCValue->setText(info[ADC_VALUE].toString());
     m_showR32NDValue->setText(info[CONCENTRATION].toString());
+    Q_EMIT cmdCompleted(cmd);
 }

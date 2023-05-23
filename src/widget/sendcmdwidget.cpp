@@ -20,6 +20,7 @@ SendCmdWidget::SendCmdWidget(QWidget *parent)
     , m_stepsWidget(new StepsWidget(this))
     , m_inputSlaveAddress(new QLineEdit(this))
     , m_inputSlaveAddressResult(new QLineEdit(this))
+    , m_setProductIDInput(new QLineEdit(this))
     , m_ndInput(new QLineEdit(this))
     , m_temperatureInput(new QLineEdit(this))
     , m_softwareLabel(new QLineEdit(this))
@@ -31,6 +32,8 @@ SendCmdWidget::SendCmdWidget(QWidget *parent)
 
     connect(m_handleData, &HandleData::frameReceived, this, &SendCmdWidget::recvAckData);
     connect(this, &SendCmdWidget::ntcTemperatureValue, this, &SendCmdWidget::setNTCTemperature);
+    connect(this, &SendCmdWidget::cmdCompleted, m_stepsWidget, &StepsWidget::stepComplete);
+    connect(this, &SendCmdWidget::cmdCompleted, this, &SendCmdWidget::stepCompleted);
 }
 
 SendCmdWidget::~SendCmdWidget()
@@ -58,29 +61,32 @@ void SendCmdWidget::initUI()
     m_mainLayout->addLayout(initReadR32InfoUI("R32采样"));
 }
 
-void SendCmdWidget::recvAckData(int cmd, const QVariantMap &info)
+void SendCmdWidget::recvAckData(quint8 cmd, const QVariantMap &info)
 {
     OperateBaseWidget::recvAckData(cmd, info);
 
     qInfo() << Q_FUNC_INFO << cmd << info;
     switch (cmd) {
         case READ_PRODUCT_ADDR_CMD:
-            showProductSlaveAddress(info);
+            showProductSlaveAddress(cmd, info);
             break;
         case READ_PRODUCT_ID_CMD:
-            showProductID(info);
+            showProductID(cmd, info);
             break;
         case VER_CMD:
-            showSoftwareVersion(info);
+            showSoftwareVersion(cmd, info);
             break;
         case LD_CMD:
-            showOperateResult(info, m_showSetLDResult);
+            showOperateResult(cmd, info, m_showSetLDResult);
             break;
         case ND_CMD:
-            showOperateResult(info, m_showSetNDResult);
+            showOperateResult(cmd, info, m_showSetNDResult);
             break;
         case SET_ID_CMD:
-            showOperateResult(info, m_showSetProductIDResult);
+            showOperateResult(cmd, info, m_showSetProductIDResult);
+            break;
+        case SET_SLAVE_ADDR_CMD:
+            showOperateResult(cmd, info, m_inputSlaveAddressResult);
             break;
         default:
             break;
@@ -153,7 +159,7 @@ void SendCmdWidget::initReadSlaveAddressUI()
     m_mainLayout->addLayout(hLayout);
 }
 
-void SendCmdWidget::showProductSlaveAddress(const QVariantMap &info)
+void SendCmdWidget::showProductSlaveAddress(quint8 cmd, const QVariantMap &info)
 {
     if (!info.contains(SLAVE_ADDRESS)) {
         qWarning() << "show-product-slave-address info error:" << info;
@@ -162,6 +168,7 @@ void SendCmdWidget::showProductSlaveAddress(const QVariantMap &info)
 
     int value = static_cast<quint8>(info.value(SLAVE_ADDRESS).toInt());
     m_slaveAddressLabel->setText(QString("0x%1").arg(QString::number(value, 16)));
+    Q_EMIT cmdCompleted(cmd);
 }
 
 void SendCmdWidget::initReadProductIDUI()
@@ -185,7 +192,7 @@ void SendCmdWidget::initReadProductIDUI()
     m_mainLayout->addLayout(hLayout);
 }
 
-void SendCmdWidget::showProductID(const QVariantMap &info)
+void SendCmdWidget::showProductID(quint8 cmd, const QVariantMap &info)
 {
     if (!info.contains(PRODUCT_ID) || !info.contains(PRODUCT_TYPE)) {
         qWarning() << "show-product-id info error:" << info;
@@ -197,6 +204,7 @@ void SendCmdWidget::showProductID(const QVariantMap &info)
 
     QString msg = "产品种类:" + QString::number(productType) + " 产品ID:" + QString::number(value);
     m_productIDLabel->setText(msg);
+    Q_EMIT cmdCompleted(cmd);
 }
 
 void SendCmdWidget::initReadSoftVersionUI()
@@ -222,7 +230,7 @@ void SendCmdWidget::initReadSoftVersionUI()
     m_mainLayout->addLayout(hLayout);
 }
 
-void SendCmdWidget::showSoftwareVersion(const QVariantMap &info)
+void SendCmdWidget::showSoftwareVersion(quint8 cmd, const QVariantMap &info)
 {
     if (!info.contains(SOFTWARE_VERSION)) {
         qWarning() << "show-software-version info error:" << info;
@@ -231,6 +239,7 @@ void SendCmdWidget::showSoftwareVersion(const QVariantMap &info)
 
     QString version = info.value(SOFTWARE_VERSION).toString();
     m_softwareLabel->setText(version);
+    Q_EMIT cmdCompleted(cmd);
 }
 
 void SendCmdWidget::initSetLDUI()
@@ -309,13 +318,12 @@ void SendCmdWidget::initSetProductIDUI()
     m_delayBtnList.append(btn);
 
     auto *label = new QLabel("输入ID:", this);
-    auto *idInput = new QLineEdit(this);
-    connect(btn, &QPushButton::clicked, this, [this, idInput]{
+    connect(btn, &QPushButton::clicked, this, [this]{
         m_showSetProductIDResult->clear();
 
         QVariantMap info;
         // TODO id 的类型
-        info.insert(PRODUCT_ID, idInput->text().toInt());
+        info.insert(PRODUCT_ID, m_setProductIDInput->text().toInt());
         sendDataBtnClicked(info);
     });
 
@@ -323,14 +331,14 @@ void SendCmdWidget::initSetProductIDUI()
     auto *hLayout = new QHBoxLayout();
     hLayout->addWidget(btn);
     hLayout->addWidget(label);
-    hLayout->addWidget(idInput);
+    hLayout->addWidget(m_setProductIDInput);
     hLayout->addWidget(label1);
     hLayout->addWidget(m_showSetProductIDResult);
 
     m_mainLayout->addLayout(hLayout);
 }
 
-void SendCmdWidget::showOperateResult(const QVariantMap &info, QLineEdit *resultEdit)
+void SendCmdWidget::showOperateResult(quint8 cmd, const QVariantMap &info, QLineEdit *resultEdit)
 {
     if (!info.contains(OPT_RESULT)) {
         qWarning() << "show-operate result info error:" << info;
@@ -340,6 +348,12 @@ void SendCmdWidget::showOperateResult(const QVariantMap &info, QLineEdit *result
     bool result = info.value(OPT_RESULT).toBool();
     QString strRes = result ? "操作成功!" : "操作失败!";
     resultEdit->setText(strRes);
+
+    if (cmd == SET_SLAVE_ADDR_CMD && result) {
+        m_handleData->setSlaveAddress(static_cast<quint8>(m_inputSlaveAddress->text().toInt()));
+    }
+
+    Q_EMIT cmdCompleted(cmd);
 }
 
 void SendCmdWidget::setNDValue(quint16 nd)
@@ -350,4 +364,15 @@ void SendCmdWidget::setNDValue(quint16 nd)
 void SendCmdWidget::setNTCTemperature(const QString &temperture)
 {
     m_temperatureInput->setText(temperture);
+}
+
+// 步骤完成后，记录输入的数据
+void SendCmdWidget::stepCompleted(quint8 cmd)
+{
+    switch (cmd) {
+        case SET_ID_CMD:
+            m_r32RecordValue.sensor_id = QString::number(m_setProductIDInput->text().toInt());
+            break;
+    }
+
 }
