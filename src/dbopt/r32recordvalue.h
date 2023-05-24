@@ -34,10 +34,14 @@ class R32RecordValueDao
 public:
     static bool createTable();
     static int datasCountByDateTime(quint32, quint32);
+    static bool insertOrUpdate(const R32RecordValue &data);
     static int insert(const R32RecordValue &data);
     static bool update(const R32RecordValue &data);
     static QList<R32RecordValue> queryByDateTime(const QString &beginTime, const QString &endTime);
     static int deleteByDateTime(quint32);
+
+    // sensor_id是否存在
+    static bool isExist(const QString &sensor_id);
 
 private:
     static R32RecordValue mapToConsistencylog(const QMap<QString, QVariant> &rowMap);

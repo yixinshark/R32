@@ -37,6 +37,8 @@ class ConnectionPool {
     SINGLETON(ConnectionPool)
 
 public:
+    // 是否成功
+    bool connected() const;
     void destroy(); // 销毁连接池，关闭所有的数据库连接
     QSqlDatabase openConnection();                        // 获取数据库连接
     void closeConnection(const QSqlDatabase &connection); // 释放数据库连接回连接池
@@ -46,6 +48,8 @@ private:
     bool checkDatabaseExistence(QSqlDatabase& db, const QString& databaseName);
     QSqlDatabase createConnection(const QString &connectionName); // 创建数据库连接
     ConnectionPoolPrivate *d;
+
+    bool m_connected = false;
 };
 
 #endif // CONNECTIONPOOL_H

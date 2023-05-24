@@ -74,9 +74,9 @@ ConnectionPoolPrivate::~ConnectionPoolPrivate() {
  |                             ConnectionPool 的定义                            |
  |----------------------------------------------------------------------------*/
 ConnectionPool::ConnectionPool() : d(new ConnectionPoolPrivate) {
-    bool ret = createDatabase(d->databaseName);
+    m_connected = createDatabase(d->databaseName);
     QString runlog;
-    if (!ret) {
+    if (!m_connected) {
         runlog = "create or connect database:" + d->databaseName + " failed!";
     } else {
         runlog = "create or connect database:" + d->databaseName + " success!";
@@ -236,4 +236,8 @@ bool ConnectionPool::checkDatabaseExistence(QSqlDatabase &db, const QString &dat
     }
 
     return false;
+}
+
+bool ConnectionPool::connected() const {
+    return m_connected;
 }

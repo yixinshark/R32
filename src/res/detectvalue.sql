@@ -27,6 +27,10 @@
         UPDATE r32table SET adc_value = :adc_value, concentration = :concentration WHERE sensor_id = :sensor_id
     </sql>
 
+    <sql id="countBySensorId">
+        SELECT COUNT(*) FROM r32table WHERE sensor_id = '%1'
+    </sql>
+
     <sql id="datasCount">
         SELECT count(*) FROM r32table WHERE dateTime &gt;= '%1' and dateTime &lt;= '%2'
     </sql>

@@ -1,8 +1,10 @@
 #include <QApplication>
 #include <QFile>
+#include <QDebug>
 
 #include "widget/mainwidget.h"
 #include "dbutil/connectionpool.h"
+#include "r32recordvalue.h"
 
 int main(int argc, char *argv[])
 {
@@ -19,6 +21,14 @@ int main(int argc, char *argv[])
     app.setStyleSheet(StyleSheet);
     File.close();
 #endif
+
+    // 数据库链接
+    ConnectionPool &pool = Singleton<ConnectionPool>::getInstance();
+    qInfo() << "database connected:" << pool.connected();
+    if (pool.connected()) {
+        bool ret = R32RecordValueDao::createTable();
+        qInfo() << "database create table ret:" << ret;
+    }
 
     return app.exec();
 }

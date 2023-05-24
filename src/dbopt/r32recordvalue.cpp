@@ -89,3 +89,24 @@ bool R32RecordValueDao::update(const R32RecordValue &data)
     QVariantMap params = parmsValue(data);
     return DBUtil::update(sql, params);
 }
+
+bool R32RecordValueDao::isExist(const QString &sensor_id) {
+    QString sql = Singleton<Sqls>::getInstance().getSql(SQL_R32TABLE, "countBySensorId");
+    sql = sql.arg(sensor_id);
+    qDebug() << "sql:" << sql;
+
+    int count = DBUtil::selectInt(sql);
+    if (count > 0) {
+        return true;
+    }
+
+    return false;
+}
+
+bool R32RecordValueDao::insertOrUpdate(const R32RecordValue &data) {
+    if (isExist(data.sensor_id)) {
+        return update(data);
+    } else {
+        return insert(data) > 0;
+    }
+}

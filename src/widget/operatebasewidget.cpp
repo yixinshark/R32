@@ -22,6 +22,7 @@
 
 OperateBaseWidget::OperateBaseWidget(QWidget *parent)
     : QWidget(parent)
+    , m_timer(new QTimer(this))
     , m_connectBtn(new QPushButton("连接", this))
     , m_cntStatusWidget(new StatusWidget(this))
     , m_serialPortSettings(new SerialPortSettingsWidget(this))
@@ -29,6 +30,9 @@ OperateBaseWidget::OperateBaseWidget(QWidget *parent)
     , m_handleData(new HandleData(this))
 {
     m_connectBtn->setObjectName("connect");
+    m_timer->setSingleShot(false);
+    // TODO 可配置
+    m_timer->setInterval(1 * 1000); // 1s
 
     connect(m_serialPortCom, &SerialPortCom::dataReceived,
             m_handleData, &HandleData::processReceivedData);
@@ -237,7 +241,23 @@ QLayout *OperateBaseWidget::initReadR32InfoUI(const QString &btnTitle)
         m_showR32ADCValue->clear();
         m_showR32NDValue->clear();
 
+        if (m_serialPortCom->isSerialPortOpen() && !m_timer->isActive()) {
+            m_timer->start();
+        }
+
         sendDataBtnClicked();
+    });
+
+    connect(m_timer, &QTimer::timeout, this, [btn, this]{
+        if (!m_serialPortCom->isSerialPortOpen()) {
+            m_timer->stop();
+            m_showR32ADCValue->clear();
+            m_showR32NDValue->clear();
+            return;
+        }
+
+        // 模拟按钮点击，相当于定时获取数据
+        emit btn->delayedClicked();
     });
 
     auto *label = new QLabel("ADC值:", this);

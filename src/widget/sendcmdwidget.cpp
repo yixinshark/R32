@@ -13,6 +13,7 @@
 #include <QLineEdit>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QDateTime>
 
 SendCmdWidget::SendCmdWidget(QWidget *parent)
     : OperateBaseWidget(parent)
@@ -373,6 +374,27 @@ void SendCmdWidget::stepCompleted(quint8 cmd)
         case SET_ID_CMD:
             m_r32RecordValue.sensor_id = QString::number(m_setProductIDInput->text().toInt());
             break;
+        case VER_CMD:
+            m_r32RecordValue.software_version = m_softwareLabel->text();
+            break;
+        case ND_CMD:
+            m_r32RecordValue.adc_value = m_showADCValue->text().toInt();
+            m_r32RecordValue.concentration = m_showR32NDValue->text();
+            break;
     }
 
+    // 可以记录数据检测
+    if (m_stepsWidget->canRecordData()) {
+        // 生产流水号：系统时间+产品ID
+        QString serialNumber = QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + m_r32RecordValue.sensor_id;
+        m_r32RecordValue.serial_number = serialNumber;
+        m_r32RecordValue.dateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+
+        if (R32RecordValueDao::insertOrUpdate(m_r32RecordValue)) {
+            qInfo() << "insert or update r32 record value success!";
+            m_stepsWidget->stepComplete(RECORD_DATA);
+        } else {
+            qWarning() << "insert or update r32 record value failed!:" << m_r32RecordValue.toString();
+        }
+    }
 }

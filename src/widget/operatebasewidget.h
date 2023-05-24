@@ -54,6 +54,7 @@ private:
 protected:
     QList<DelayedButton *> m_delayBtnList;
 
+    QTimer *m_timer;
     QPushButton *m_connectBtn;
     StatusWidget *m_cntStatusWidget;
     SerialPortSettingsWidget *m_serialPortSettings;
