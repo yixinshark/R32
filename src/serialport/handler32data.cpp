@@ -473,9 +473,9 @@ void Handler32data::addContent(char cmd, const QVariantMap &info, QByteArray &da
             break;
         }
         case CMD_02: {
+            addFourNoneByte();
             bool isReadAddress = info.value(MODULE_ADDRESS, false).toBool();
             if (!isReadAddress) {
-                addFourNoneByte();
                 m_isReadAddress = false;
             } else {
                data[1] = 0x00;
@@ -562,6 +562,7 @@ bool Handler32data::addCmd_set_address_Content(const QVariantMap &info, QByteArr
         return false;
     }
 
+    m_address = static_cast<char>(info.value(SET_MODULE_ADDRESS).toUInt());
     m_isSetAddress = true;
     // 修改i地址字节，添加设置地址数据
     data[1] = 0x00;

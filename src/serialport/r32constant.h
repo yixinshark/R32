@@ -49,6 +49,8 @@ const quint8 CMD_OPEN_CLOSE_PRINT_42 = 0x42;
 const quint8 CMD_QUERY_FAULT_STATUS_43 = 0x43;
 // 设置报警阈值
 const quint8 CMD_SET_ALARM_THRESHOLD_44 = 0x44;
+// 读取报警阈值
+const quint8 CMD_READ_ALARM_THRESHOLD_45 = 0x45;
 
 // 常量定义
 // -------------------------send--------------------------------

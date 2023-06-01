@@ -4,10 +4,12 @@
 
 #include "operater32widget.h"
 #include "delayedbutton.h"
+#include "r32constant.h"
 
 #include <QGridLayout>
-#include <QVBoxLayout>
 #include <QLineEdit>
+#include <QRadioButton>
+#include <QButtonGroup>
 
 OperateR32Widget::OperateR32Widget(HandleDataBase *handleData, QWidget *parent)
     : OperateBaseWidget(handleData, parent)
@@ -69,18 +71,35 @@ void OperateR32Widget::initCalibrationCmdUI()
 {
     // 标定按钮
     auto *calibrationBtn = new DelayedButton("标定浓度", this);
-
     // 点位输入框
     auto *pointEdit = new QLineEdit(this);
     pointEdit->setPlaceholderText("请输入点位");
-
     // 浓度输入框
     auto *concentrationEdit = new QLineEdit(this);
     concentrationEdit->setPlaceholderText("请输入浓度");
-
     // 结果显示框
     m_calibrationResultEdit->setPlaceholderText("结果或错误信息显示");
     m_calibrationResultEdit->setReadOnly(true);
+
+    connect(calibrationBtn, &DelayedButton::clicked, this, [pointEdit, concentrationEdit,this](){
+        // 校验点位
+        if (pointEdit->text().isEmpty()) {
+            m_calibrationResultEdit->setText("点位不能为空");
+            return;
+        }
+
+        // 校验浓度
+        if (concentrationEdit->text().isEmpty()) {
+            m_calibrationResultEdit->setText("浓度不能为空");
+            return;
+        }
+
+        QVariantMap info;
+        info.insert(SEND_CAL_POINT, pointEdit->text().toInt());
+        info.insert(SEND_CAL_CONCENTRATION, concentrationEdit->text().toUShort());
+
+        sendCmdData(CMD_01, info);
+    });
 
     m_gridLayout->addWidget(calibrationBtn, 0, 0, 2, 1);
     m_gridLayout->addWidget(pointEdit, 0, 1, 1, 1, Qt::AlignLeft);
@@ -92,18 +111,21 @@ void OperateR32Widget::initCalibrationCmdUI()
     // 结果显示框
     m_calFinishResultEdit->setPlaceholderText("结果或错误信息显示");
     m_calFinishResultEdit->setReadOnly(true);
-
+    connect(calibrationFinishBtn, &DelayedButton::clicked, this, [this](){
+        sendCmdData(CMD_02);
+    });
     // 从第三行开始
     m_gridLayout->addWidget(calibrationFinishBtn, 3, 0, 1, 1);
     m_gridLayout->addWidget(m_calFinishResultEdit, 3, 1, 1, 2);
 
     // 获取标定状态按钮
     auto *calibrationStatusBtn = new DelayedButton("获取标定状态", this);
-
     // 结果显示框
     m_calStatusResultEdit->setPlaceholderText("结果或错误信息显示");
     m_calStatusResultEdit->setReadOnly(true);
-
+    connect(calibrationStatusBtn, &DelayedButton::clicked, this, [this](){
+        sendCmdData(CMD_ND_STATUS_03);
+    });
     // 从第四行开始
     m_gridLayout->addWidget(calibrationStatusBtn, 4, 0, 1, 1);
     m_gridLayout->addWidget(m_calStatusResultEdit, 4, 1, 1, 2);
@@ -115,7 +137,9 @@ void OperateR32Widget::initReadParamCmdUI()
     auto *readZeroResistanceBtn = new DelayedButton("读取零点电阻", this);
     m_readZeroResResultEdit->setPlaceholderText("零点电阻值");
     m_readZeroResResultEdit->setReadOnly(true);
-
+    connect(readZeroResistanceBtn, &DelayedButton::clicked, this, [this](){
+        sendCmdData(CMD_READ_R0_04);
+    });
     m_gridLayout->addWidget(readZeroResistanceBtn, 0, 3, 1, 1);
     m_gridLayout->addWidget(m_readZeroResResultEdit, 0, 4, 1, 1);
 
@@ -123,7 +147,9 @@ void OperateR32Widget::initReadParamCmdUI()
     auto *readCalParamP1Btn = new DelayedButton("读取标定参数P1", this);
     m_readCalP1ResultEdit->setPlaceholderText("标定参数P1");
     m_readCalP1ResultEdit->setReadOnly(true);
-
+    connect(readCalParamP1Btn, &DelayedButton::clicked, this, [this](){
+        sendCmdData(CMD_READ_PARAM1_05);
+    });
     m_gridLayout->addWidget(readCalParamP1Btn, 1, 3, 1, 1);
     m_gridLayout->addWidget(m_readCalP1ResultEdit, 1, 4, 1, 1);
 
@@ -131,7 +157,9 @@ void OperateR32Widget::initReadParamCmdUI()
     auto *readCalParamP2Btn = new DelayedButton("读取标定参数P2", this);
     m_readCalP2ResultEdit->setPlaceholderText("标定参数P2");
     m_readCalP2ResultEdit->setReadOnly(true);
-
+    connect(readCalParamP2Btn, &DelayedButton::clicked, this, [this](){
+        sendCmdData(CMD_READ_PARAM2_06);
+    });
     m_gridLayout->addWidget(readCalParamP2Btn, 2, 3, 1, 1);
     m_gridLayout->addWidget(m_readCalP2ResultEdit, 2, 4, 1, 1);
 
@@ -139,7 +167,9 @@ void OperateR32Widget::initReadParamCmdUI()
     auto *readCalParamP3Btn = new DelayedButton("读取标定参数P3", this);
     m_readCalP3ResultEdit->setPlaceholderText("1000ppm的Rs/R0");
     m_readCalP3ResultEdit->setReadOnly(true);
-
+    connect(readCalParamP3Btn, &DelayedButton::clicked, this, [this](){
+        sendCmdData(CMD_READ_1000PPM_07);
+    });
     m_gridLayout->addWidget(readCalParamP3Btn, 3, 3, 1, 1);
     m_gridLayout->addWidget(m_readCalP3ResultEdit, 3, 4, 1, 1);
 
@@ -147,7 +177,9 @@ void OperateR32Widget::initReadParamCmdUI()
     auto *readCalParamP4Btn = new DelayedButton("读取标定参数P4", this);
     m_readCalP4ResultEdit->setPlaceholderText("5000ppm的Rs/R0");
     m_readCalP4ResultEdit->setReadOnly(true);
-
+    connect(readCalParamP4Btn, &DelayedButton::clicked, this, [this](){
+        sendCmdData(CMD_READ_5000PPM_08);
+    });
     m_gridLayout->addWidget(readCalParamP4Btn, 4, 3, 1, 1);
     m_gridLayout->addWidget(m_readCalP4ResultEdit, 4, 4, 1, 1);
 }
@@ -160,6 +192,9 @@ void OperateR32Widget::initDetectionCmdUI()
     m_curTempResultEdit->setReadOnly(true);
     m_curHumidityResultEdit->setPlaceholderText("当前湿度");
     m_curHumidityResultEdit->setReadOnly(true);
+    connect(getTempHumBtn, &DelayedButton::clicked, this, [this](){
+        sendCmdData(CMD_READ_TEMP_HUM_21);
+    });
     m_gridLayout->addWidget(getTempHumBtn, 0, 5, 1, 1);
     m_gridLayout->addWidget(m_curTempResultEdit, 0, 6, 1, 1);
     m_gridLayout->addWidget(m_curHumidityResultEdit, 0, 7, 1, 1);
@@ -168,6 +203,9 @@ void OperateR32Widget::initDetectionCmdUI()
     auto *getGasAdcBtn = new DelayedButton("获取气体ADC", this);
     m_curGasADCResultEdit->setPlaceholderText("当前气体ADC值");
     m_curGasADCResultEdit->setReadOnly(true);
+    connect(getGasAdcBtn, &DelayedButton::clicked, this, [this](){
+        sendCmdData(CMD_READ_ADC_22);
+    });
     m_gridLayout->addWidget(getGasAdcBtn, 1, 5, 1, 1);
     m_gridLayout->addWidget(m_curGasADCResultEdit, 1, 6, 1, 2);
 
@@ -175,6 +213,9 @@ void OperateR32Widget::initDetectionCmdUI()
     auto *getGasResistanceBtn = new DelayedButton("获取气体阻值", this);
     m_gasResResultEdit->setPlaceholderText("当前气体探头的阻值");
     m_gasResResultEdit->setReadOnly(true);
+    connect(getGasResistanceBtn, &DelayedButton::clicked, this, [this](){
+        sendCmdData(CMD_READ_RESISTANCE_23);
+    });
     m_gridLayout->addWidget(getGasResistanceBtn, 2, 5, 1, 1);
     m_gridLayout->addWidget(m_gasResResultEdit, 2, 6, 1, 2);
 
@@ -182,6 +223,9 @@ void OperateR32Widget::initDetectionCmdUI()
     auto *getCompensatedResistanceBtn = new DelayedButton("获取补偿后的阻值", this);
     m_compensateResResultEdit->setPlaceholderText("温度补偿后的气体探头阻值");
     m_compensateResResultEdit->setReadOnly(true);
+    connect(getCompensatedResistanceBtn, &DelayedButton::clicked, this, [this](){
+        sendCmdData(CMD_READ_COMPENSATION_RESISTANCE_24);
+    });
     m_gridLayout->addWidget(getCompensatedResistanceBtn, 3, 5, 1, 1);
     m_gridLayout->addWidget(m_compensateResResultEdit, 3, 6, 1, 2);
 
@@ -191,6 +235,9 @@ void OperateR32Widget::initDetectionCmdUI()
     m_concentrationResultEdit->setReadOnly(true);
     m_alarmStatusResultEdit->setPlaceholderText("报警状态");
     m_alarmStatusResultEdit->setReadOnly(true);
+    connect(getConcentrationAndAlarmBtn, &DelayedButton::clicked, this, [this](){
+        sendCmdData(CMD_READ_GAS_CONCENTRATION_25);
+    });
     m_gridLayout->addWidget(getConcentrationAndAlarmBtn, 4, 5, 1, 1);
     m_gridLayout->addWidget(m_concentrationResultEdit, 4, 6, 1, 1);
     m_gridLayout->addWidget(m_alarmStatusResultEdit, 4, 7, 1, 1);
@@ -204,7 +251,9 @@ void OperateR32Widget::initSystemCmdUI()
     m_mainVersionResultEdit->setReadOnly(true);
     m_subVersionResultEdit->setPlaceholderText("副版本号");
     m_subVersionResultEdit->setReadOnly(true);
-
+    connect(getVersionBtn, &DelayedButton::clicked, this, [this](){
+        sendCmdData(CMD_READ_FIRMWARE_VERSION_41);
+    });
     m_gridLayout->addWidget(getVersionBtn, 0, 8, 1, 1);
     m_gridLayout->addWidget(m_mainVersionResultEdit, 0, 9, 1, 1);
     m_gridLayout->addWidget(m_subVersionResultEdit, 0, 10, 1, 1);
@@ -215,6 +264,18 @@ void OperateR32Widget::initSystemCmdUI()
     auto *alarmThresholdInput = new QLineEdit(this);
     m_setAlarmThresholdResultEdit->setPlaceholderText("设置报警阈值结果");
     m_setAlarmThresholdResultEdit->setReadOnly(true);
+    connect(setAlarmThresholdBtn, &DelayedButton::clicked, this, [this, alarmThresholdInput](){
+        if (alarmThresholdInput->text().isEmpty()) {
+            m_setAlarmThresholdResultEdit->setText("请输入报警阈值");
+            return;
+        }
+
+        auto alarmThreshold = alarmThresholdInput->text().toUShort();
+        QVariantMap info;
+        info.insert(SEND_ALARM_THRESHOLD, alarmThreshold);
+
+        sendCmdData(CMD_SET_ALARM_THRESHOLD_44, info);
+    });
     m_gridLayout->addWidget(setAlarmThresholdBtn, 1, 8, 1, 1);
     m_gridLayout->addWidget(alarmThresholdInput, 1, 9, 1, 1);
     m_gridLayout->addWidget(m_setAlarmThresholdResultEdit, 1, 10, 1, 1);
@@ -223,6 +284,9 @@ void OperateR32Widget::initSystemCmdUI()
     auto *readAlarmThresholdBtn = new DelayedButton("读取报警阈值", this);
     m_readAlarmThresholdResultEdit->setPlaceholderText("读取报警阈值结果");
     m_readAlarmThresholdResultEdit->setReadOnly(true);
+    connect(readAlarmThresholdBtn, &DelayedButton::clicked, this, [this](){
+        sendCmdData(CMD_READ_ALARM_THRESHOLD_45);
+    });
     m_gridLayout->addWidget(readAlarmThresholdBtn, 2, 8, 1, 1);
     m_gridLayout->addWidget(m_readAlarmThresholdResultEdit, 2, 9, 1, 2);
 
@@ -230,6 +294,9 @@ void OperateR32Widget::initSystemCmdUI()
     auto *readFaultCodeBtn = new DelayedButton("读取故障码", this);
     m_readFaultCodeResultEdit->setPlaceholderText("读取故障码结果");
     m_readFaultCodeResultEdit->setReadOnly(true);
+    connect(readFaultCodeBtn, &DelayedButton::clicked, this, [this](){
+        sendCmdData(CMD_QUERY_FAULT_STATUS_43);
+    });
     m_gridLayout->addWidget(readFaultCodeBtn, 3, 8, 1, 1);
     m_gridLayout->addWidget(m_readFaultCodeResultEdit, 3, 9, 1, 2);
 
@@ -237,8 +304,25 @@ void OperateR32Widget::initSystemCmdUI()
     auto *printDataSwitchBtn = new DelayedButton("打印数据开关", this);
     m_printDataSwitchResultEdit->setPlaceholderText("打印数据开关结果");
     m_printDataSwitchResultEdit->setReadOnly(true);
+    auto *openPrintDataBtn = new QRadioButton("开", this);
+    auto *closePrintDataBtn = new QRadioButton("关", this);
+    openPrintDataBtn->setChecked(true);
+    auto *printDataBtnGroup = new QButtonGroup(this);
+    printDataBtnGroup->addButton(closePrintDataBtn, 0);
+    printDataBtnGroup->addButton(openPrintDataBtn, 1);
+    auto *printDataBtnLayout = new QHBoxLayout;
+    printDataBtnLayout->setMargin(10);
+    printDataBtnLayout->addWidget(openPrintDataBtn);
+    printDataBtnLayout->addWidget(closePrintDataBtn);
+    connect(printDataSwitchBtn, &DelayedButton::clicked, this, [this, printDataBtnGroup](){
+        QVariantMap info;
+        info.insert(SEND_PRINT_ENABLE, printDataBtnGroup->checkedId());
+
+        sendCmdData(CMD_OPEN_CLOSE_PRINT_42, info);
+    });
     m_gridLayout->addWidget(printDataSwitchBtn, 4, 8, 1, 1);
-    m_gridLayout->addWidget(m_printDataSwitchResultEdit, 4, 9, 1, 2);
+    m_gridLayout->addLayout(printDataBtnLayout, 4, 9, 1, 1);
+    m_gridLayout->addWidget(m_printDataSwitchResultEdit, 4, 10, 1, 1);
 }
 
 void OperateR32Widget::initBroadcastCmdUI()
@@ -252,10 +336,36 @@ void OperateR32Widget::initBroadcastCmdUI()
     m_setModuleAddressResultEdit->setPlaceholderText("设置模块地址结果");
     m_setModuleAddressResultEdit->setReadOnly(true);
 
+    connect(setModuleAddressBtn, &DelayedButton::clicked, this, [moduleAddressInput, this](){
+        QString moduleAddress = moduleAddressInput->text();
+        if (moduleAddress.isEmpty()) {
+            m_setModuleAddressResultEdit->setText("请输入模块地址");
+            return;
+        }
+        bool ok;
+        quint8 address = moduleAddress.toUInt(&ok, 16);
+        if (!ok) {
+            m_setModuleAddressResultEdit->setText("请输入正确的模块地址");
+            return;
+        }
+
+        QVariantMap info;
+        info.insert(MODULE_ADDRESS, true);
+        info.insert(SET_MODULE_ADDRESS, address);
+
+        sendCmdData(CMD_01, info);
+    });
+
     // 读取模块地址按钮
     auto *readModuleAddressBtn = new DelayedButton("读取模块地址", this);
     m_readModuleAddressResultEdit->setPlaceholderText("读取模块地址结果");
     m_readModuleAddressResultEdit->setReadOnly(true);
+    connect(readModuleAddressBtn, &DelayedButton::clicked, this, [this](){
+        QVariantMap info;
+        info.insert(MODULE_ADDRESS, true);
+
+        sendCmdData(CMD_02, info);
+    });
 
     auto *hLayout = new QHBoxLayout;
     hLayout->addWidget(setModuleAddressBtn);
