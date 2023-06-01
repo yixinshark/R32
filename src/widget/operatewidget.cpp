@@ -4,9 +4,10 @@
 
 #include "operatewidget.h"
 #include "serialportsettingswidget.h"
-#include "sendcmdwidget.h"
+//#include "sendcmdwidget.h"
 #include "recvr32datawidget.h"
 #include "mcuoperatewidget.h"
+#include "operater32widget.h"
 
 #include "handler32data.h"
 #include "handlemcudata.h"
@@ -25,16 +26,16 @@ OperateWidget::OperateWidget(QWidget *parent)
     auto *handlerMcuData = new HandleMcuData(this);
     auto *handler32Data = new Handler32data(this);
 
-    m_sendCmdWidget = new SendCmdWidget(handler32Data, this);
+    m_operateR32Widget = new OperateR32Widget(handler32Data, this);
     m_recvR32DataWidget = new RecvR32DataWidget(handler32Data, this);
     m_mcuOperateWidget = new McuOperateWidget(handlerMcuData, this);
 
     initUI();
 
-    connect(m_sendCmdWidget, &SendCmdWidget::operatedMsg, this, &OperateWidget::showMsg);
+    connect(m_operateR32Widget, &OperateR32Widget::operatedMsg, this, &OperateWidget::showMsg);
     connect(m_recvR32DataWidget, &RecvR32DataWidget::operatedMsg, this, &OperateWidget::showMsg);
 
-    connect(m_recvR32DataWidget, &RecvR32DataWidget::r32NDValue, m_sendCmdWidget, &SendCmdWidget::setNDValue);
+//    connect(m_recvR32DataWidget, &RecvR32DataWidget::r32NDValue, m_operateR32Widget, &OperateR32Widget::setNDValue);
 }
 
 OperateWidget::~OperateWidget()
@@ -53,7 +54,7 @@ void OperateWidget::initUI()
 
     auto *vLayout = new QHBoxLayout();
     vLayout->setContentsMargins(0, 0, 0, 1);
-    vLayout->addWidget(m_sendCmdWidget);
+    vLayout->addWidget(m_operateR32Widget);
     groupBox->setLayout(vLayout);
     mainLayout->addWidget(groupBox);
 

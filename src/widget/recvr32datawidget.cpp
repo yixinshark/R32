@@ -13,11 +13,11 @@
 #include <QDebug>
 #include <QLabel>
 #include <QLineEdit>
-#include <QVBoxLayout>
+#include <QGridLayout>
 
 RecvR32DataWidget::RecvR32DataWidget(HandleDataBase *handleData, QWidget *parent)
     : OperateBaseWidget(handleData, parent)
-    , m_mainLayout(new QVBoxLayout(this))
+    , m_gridLayout(new QGridLayout())
 {
     initUI();
     connect(m_handleData, &HandleDataBase::frameReceived, this, &RecvR32DataWidget::recvAckData);
@@ -30,15 +30,17 @@ RecvR32DataWidget::~RecvR32DataWidget()
 
 void RecvR32DataWidget::initUI()
 {
+    auto *mainLayout = new QVBoxLayout(this);
+    mainLayout->setSpacing(20);
     auto *layout = initSerialPortUI();
+    mainLayout->addLayout(layout);
 
-    m_mainLayout->setSpacing(13);
-    m_mainLayout->setContentsMargins(0, 0, 0, 15);
-    m_mainLayout->addLayout(layout);
+    m_gridLayout->setSpacing(13);
 
     //initReadNTCInfoUI();
     initReadR32InfoUI();
-    m_mainLayout->addStretch();
+    mainLayout->addLayout(m_gridLayout);
+    mainLayout->addStretch();
 }
 
 void RecvR32DataWidget::initReadR32InfoUI()
@@ -86,14 +88,11 @@ void RecvR32DataWidget::initReadR32InfoUI()
     auto *label = new QLabel("ADC值:", this);
     auto *label1 = new QLabel("浓度值:", this);
 
-    auto *hLayout = new QHBoxLayout();
-    hLayout->addWidget(btn);
-    hLayout->addWidget(label);
-    hLayout->addWidget(m_showR32ADCValue);
-    hLayout->addWidget(label1);
-    hLayout->addWidget(m_showR32NDValue);
-
-    m_mainLayout->addLayout(hLayout);
+    m_gridLayout->addWidget(btn, 0, 0, 2, 1);
+    m_gridLayout->addWidget(label, 0, 1);
+    m_gridLayout->addWidget(m_showR32ADCValue, 0, 2);
+    m_gridLayout->addWidget(label1, 1, 1);
+    m_gridLayout->addWidget(m_showR32NDValue, 1, 2);
 }
 
 void RecvR32DataWidget::recvAckData(quint8 cmd, const QVariantMap &info)

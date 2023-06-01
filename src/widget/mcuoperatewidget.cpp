@@ -29,6 +29,7 @@ McuOperateWidget::~McuOperateWidget()
 
 void McuOperateWidget::initUI()
 {
+    m_gridLayout->setSpacing(10);
     // 第一行
     initBoxSwitchUI(0);
     // 第二行
@@ -43,10 +44,16 @@ void McuOperateWidget::initUI()
     initAlarmCtrlUI(5);
 
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(20);
+//    mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->addLayout(initSerialPortUI());
-    mainLayout->addLayout(m_gridLayout);
-    mainLayout->addStretch();
+//    mainLayout->addLayout(m_gridLayout);
+
+    auto *hLayout = new QHBoxLayout();
+    hLayout->addLayout(m_gridLayout);
+    hLayout->addSpacerItem(new QSpacerItem(60, 20, QSizePolicy::Expanding, QSizePolicy::Expanding));
+    mainLayout->addLayout(hLayout);
+//    mainLayout->addStretch();
 }
 
 void McuOperateWidget::initBoxSwitchUI(int rowIndex)
@@ -59,7 +66,7 @@ void McuOperateWidget::initBoxSwitchUI(int rowIndex)
     powerButtonGroup->addButton(offRadioButton);
 
     m_gridLayout->addWidget(powerButton, rowIndex, 0);
-    m_gridLayout->addWidget(onRadioButton, rowIndex, 1, Qt::AlignRight);
+    m_gridLayout->addWidget(onRadioButton, rowIndex, 1);
     m_gridLayout->addWidget(offRadioButton, rowIndex, 2);
     connect(powerButton, &DelayedButton::delayedClicked, this, [this, onRadioButton]() {
         qInfo() << "箱体开关:" << onRadioButton->isChecked();
@@ -80,7 +87,7 @@ void McuOperateWidget::initValveCtrlUI(int rowIndex)
     auto *valve5CheckBox = new QCheckBox("电磁阀5", this);
 
     m_gridLayout->addWidget(openValveButton, rowIndex, 0);
-    m_gridLayout->addWidget(valve1CheckBox, rowIndex, 1,  Qt::AlignRight);
+    m_gridLayout->addWidget(valve1CheckBox, rowIndex, 1);
     m_gridLayout->addWidget(valve2CheckBox, rowIndex, 2);
     m_gridLayout->addWidget(valve3CheckBox, rowIndex, 3);
     m_gridLayout->addWidget(valve4CheckBox, rowIndex, 4);
@@ -115,7 +122,7 @@ void McuOperateWidget::initFanCtrlUI(int rowIndex)
     auto *fan4CheckBox = new QCheckBox("风扇4", this);
 
     m_gridLayout->addWidget(fanBtn, rowIndex, 0);
-    m_gridLayout->addWidget(fan1CheckBox, rowIndex, 1, Qt::AlignRight);
+    m_gridLayout->addWidget(fan1CheckBox, rowIndex, 1);
     m_gridLayout->addWidget(fan2CheckBox, rowIndex, 2);
     m_gridLayout->addWidget(fan3CheckBox, rowIndex, 3);
     m_gridLayout->addWidget(fan4CheckBox, rowIndex, 4);
@@ -149,7 +156,7 @@ void McuOperateWidget::initConcentrationCtrlUI(int rowIndex)
     hLayout->addWidget(concentrationLineEdit);
 
     m_gridLayout->addWidget(controlButton, rowIndex, 0);
-    m_gridLayout->addLayout(hLayout, rowIndex, 1);
+    m_gridLayout->addLayout(hLayout, rowIndex, 1, 1, 5);
 
     connect(controlButton, &DelayedButton::delayedClicked, this, [this, concentrationLineEdit]() {
         qInfo() << "浓度控制:" << concentrationLineEdit->text();
@@ -165,12 +172,13 @@ void McuOperateWidget::initChannelSelectUI(int rowIndex)
 {
     auto *channelBtn = new DelayedButton("通道选择", this);
     auto *channelBox = new QComboBox(this);
+    channelBox->setMinimumHeight(30);
     for (int i = 1; i <= 64; ++i) {
         channelBox->addItem(QString::number(i));
     }
 
     m_gridLayout->addWidget(channelBtn, rowIndex, 0);
-    m_gridLayout->addWidget(channelBox, rowIndex, 1);
+    m_gridLayout->addWidget(channelBox, rowIndex, 1, 1, 5);
     connect(channelBtn, &DelayedButton::delayedClicked, this, [this, channelBox]() {
         qInfo() << "通道选择:" << channelBox->currentText();
 
@@ -198,9 +206,9 @@ void McuOperateWidget::initAlarmCtrlUI(int rowIndex)
     hLayout2->addWidget(alarmLineEdit);
 
     m_gridLayout->addWidget(alarmButton, rowIndex, 0);
-    m_gridLayout->addLayout(hLayout2, rowIndex, 1);
-    m_gridLayout->addWidget(alarmOnRadioButton, rowIndex, 2);
-    m_gridLayout->addWidget(alarmOffRadioButton, rowIndex, 3);
+    m_gridLayout->addLayout(hLayout2, rowIndex, 1, 1, 2);
+    m_gridLayout->addWidget(alarmOnRadioButton, rowIndex, 3);
+    m_gridLayout->addWidget(alarmOffRadioButton, rowIndex, 4);
 
     connect(alarmButton, &DelayedButton::delayedClicked, this, [this, alarmLineEdit,
                                                           alarmOnRadioButton]() {

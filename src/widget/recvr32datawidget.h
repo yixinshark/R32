@@ -8,7 +8,7 @@
 #include "operatebasewidget.h"
 
 class QLineEdit;
-class QVBoxLayout;
+class QGridLayout;
 
 /**
  * @brief 接收R32分析仪数据
@@ -32,7 +32,7 @@ private:
     void showR32Info(const QVariantMap &info);
 
 private:
-    QVBoxLayout *m_mainLayout;
+    QGridLayout *m_gridLayout;
 
     // R32
     QLineEdit *m_showR32ADCValue;

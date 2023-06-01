@@ -7,7 +7,8 @@
 
 #include <QWidget>
 
-class SendCmdWidget;
+//class SendCmdWidget;
+class OperateR32Widget;
 class RecvR32DataWidget;
 class McuOperateWidget;
 
@@ -25,7 +26,8 @@ private:
     void showMsg(const QString &msg);
 
 private:
-    SendCmdWidget *m_sendCmdWidget;
+//    SendCmdWidget *m_sendCmdWidget;
+    OperateR32Widget *m_operateR32Widget;
     RecvR32DataWidget *m_recvR32DataWidget;
     McuOperateWidget *m_mcuOperateWidget;
 
