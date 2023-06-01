@@ -26,7 +26,7 @@ MainWidget::~MainWidget()
 
 void MainWidget::initUI()
 {
-    setMinimumSize(960, 790);
+//    setMinimumSize(960, 790);
 
     auto *tabWidget = new TabWidget(this);
     QStringList tabs;

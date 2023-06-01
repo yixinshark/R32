@@ -19,7 +19,7 @@ TabWidget::TabWidget(QWidget *parent)
     mainLayout->setContentsMargins(5, 0, 5, 0);
     mainLayout->addLayout(m_titleLayout);
     mainLayout->addLayout(m_stackedLayout);
-    mainLayout->setSpacing(20);
+//    mainLayout->setSpacing(10);
     setLayout(mainLayout);
 }
 

@@ -17,14 +17,26 @@ class RecvR32DataWidget : public OperateBaseWidget
 {
     Q_OBJECT
 public:
-    explicit RecvR32DataWidget(QWidget *parent = nullptr);
+    explicit RecvR32DataWidget(HandleDataBase *handleData, QWidget *parent = nullptr);
     ~RecvR32DataWidget() override;
+
+signals:
+    void r32NDValue(quint16 nd);
+
+protected:
+    void recvAckData(quint8 cmd, const QVariantMap &info) override;
 
 private:
     void initUI();
+    void initReadR32InfoUI();
+    void showR32Info(const QVariantMap &info);
 
 private:
     QVBoxLayout *m_mainLayout;
+
+    // R32
+    QLineEdit *m_showR32ADCValue;
+    QLineEdit *m_showR32NDValue;
 };
 
 

@@ -3,20 +3,22 @@
 //
 
 #include "sendcmdwidget.h"
-#include "handledata.h"
+#include "handledatabase.h"
 #include "constant.h"
 #include "serialportcom.h"
 #include "delayedbutton.h"
 #include "stepswidget.h"
+#include "handler32data.h"
 
 #include <QDebug>
+#include <QTimer>
 #include <QLineEdit>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QDateTime>
 
-SendCmdWidget::SendCmdWidget(QWidget *parent)
-    : OperateBaseWidget(parent)
+SendCmdWidget::SendCmdWidget(HandleDataBase *handleData, QWidget *parent)
+    : OperateBaseWidget(handleData, parent)
     , m_mainLayout(new QVBoxLayout(this))
     , m_stepsWidget(new StepsWidget(this))
     , m_inputSlaveAddress(new QLineEdit(this))
@@ -28,10 +30,12 @@ SendCmdWidget::SendCmdWidget(QWidget *parent)
     , m_showSetLDResult(new QLineEdit(this))
     , m_showSetNDResult(new QLineEdit(this))
     , m_showSetProductIDResult(new QLineEdit(this))
+    , m_timer(new QTimer(this))
 {
+//    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     initUI();
 
-    connect(m_handleData, &HandleData::frameReceived, this, &SendCmdWidget::recvAckData);
+    connect(m_handleData, &HandleDataBase::frameReceived, this, &SendCmdWidget::recvAckData);
     connect(this, &SendCmdWidget::ntcTemperatureValue, this, &SendCmdWidget::setNTCTemperature);
     connect(this, &SendCmdWidget::cmdCompleted, m_stepsWidget, &StepsWidget::stepComplete);
     connect(this, &SendCmdWidget::cmdCompleted, this, &SendCmdWidget::stepCompleted);
@@ -45,7 +49,7 @@ SendCmdWidget::~SendCmdWidget()
 void SendCmdWidget::initUI()
 {
     m_mainLayout->setContentsMargins(0, 0, 0, 0);
-    m_mainLayout->setSpacing(20);
+    m_mainLayout->setSpacing(10);
 
     auto *layout = initSerialPortUI();
     m_mainLayout->addLayout(layout);
@@ -57,14 +61,22 @@ void SendCmdWidget::initUI()
     //initReadProductIDUI();
     initReadSoftVersionUI();
     initSetLDUI();
-    m_mainLayout->addLayout(initReadNTCInfoUI());
+    initReadNTCInfoUI();
     initSetNDUI();
-    m_mainLayout->addLayout(initReadR32InfoUI("R32采样"));
+    initReadR32InfoUI();
 }
 
 void SendCmdWidget::recvAckData(quint8 cmd, const QVariantMap &info)
 {
-    OperateBaseWidget::recvAckData(cmd, info);
+    qInfo() << Q_FUNC_INFO << cmd << info;
+    switch (cmd) {
+        case NTC_CMD:
+            showNTCInfo(cmd, info);
+            break;
+        case R32_CMD:
+            showR32Info(cmd, info);
+            break;
+    }
 
     qInfo() << Q_FUNC_INFO << cmd << info;
     switch (cmd) {
@@ -98,7 +110,6 @@ void SendCmdWidget::initSlaveAddressUI()
 {
     auto *btn = new DelayedButton("设置从机地址", this);
     m_inputSlaveAddressResult->setPlaceholderText("显示操作结果");
-    btn->setObjectName(CMD_FD_OBJECT_NAME);
     btn->setFixedWidth(120);
     m_delayBtnList.append(btn);
     btn->installEventFilter(this);
@@ -119,7 +130,7 @@ void SendCmdWidget::initSlaveAddressUI()
         info.insert(STATIC_ADDRESS, static_address_value);
         qInfo() << "slave address:" << slaveAddressInt;
 
-        sendDataBtnClicked(info);
+        sendCmdData(SET_SLAVE_ADDR_CMD, info);
     });
 
     auto *label = new QLabel("输入地址0X:", this);
@@ -150,7 +161,7 @@ void SendCmdWidget::initReadSlaveAddressUI()
         QVariantMap info;
         info.insert(STATIC_ADDRESS, static_address_value);
 
-        sendDataBtnClicked(info);
+        sendCmdData(READ_PRODUCT_ADDR_CMD, info);
     });
 
     auto *hLayout = new QHBoxLayout();
@@ -178,12 +189,11 @@ void SendCmdWidget::initReadProductIDUI()
     m_productIDLabel->setReadOnly(true);
     auto *btn = new DelayedButton("读取产品ID", this);
     btn->setFixedWidth(120);
-    btn->setObjectName(CMD7_OBJECT_NAME);
     m_delayBtnList.append(btn);
     btn->installEventFilter(this);
     connect(btn, &QPushButton::clicked, this, [this]{
         m_productIDLabel->clear();
-        sendDataBtnClicked();
+        sendCmdData(READ_PRODUCT_ID_CMD);
     });
 
     auto *hLayout = new QHBoxLayout();
@@ -219,7 +229,7 @@ void SendCmdWidget::initReadSoftVersionUI()
     btn->installEventFilter(this);
     connect(btn, &QPushButton::clicked, this, [this]{
         m_softwareLabel->clear();
-        sendDataBtnClicked();
+        sendCmdData(VER_CMD);
     });
 
     auto *lable1 = new QLabel("软件版本号:", this);
@@ -254,7 +264,7 @@ void SendCmdWidget::initSetLDUI()
     btn->installEventFilter(this);
     connect(btn, &QPushButton::clicked, this, [this]{
         m_showSetLDResult->clear();
-        sendDataBtnClicked();
+        sendCmdData(LD_CMD);
     });
 
     auto *label = new QLabel("操作结果:", this);
@@ -272,7 +282,6 @@ void SendCmdWidget::initSetNDUI()
     m_showSetNDResult->setPlaceholderText("显示操作结果");
     auto *btn = new DelayedButton("浓度标定", this);
     btn->setFixedWidth(120);
-    btn->setObjectName(CMD2_OBJECT_NAME);
     btn->installEventFilter(this);
     m_delayBtnList.append(btn);
 
@@ -301,7 +310,7 @@ void SendCmdWidget::initSetNDUI()
         info.insert(TEMPERATURE, m_temperatureInput->text().toDouble(&ok1));
 
         if (ok & ok1) {
-            sendDataBtnClicked(info);
+            sendCmdData(ND_CMD, info);
         } else {
          m_showSetNDResult->setText("浓度值或者温度值输入有误,请重新输入!");
         }
@@ -325,7 +334,7 @@ void SendCmdWidget::initSetProductIDUI()
         QVariantMap info;
         // TODO id 的类型
         info.insert(PRODUCT_ID, m_setProductIDInput->text().toInt());
-        sendDataBtnClicked(info);
+        sendCmdData(SET_ID_CMD, info);
     });
 
     auto *label1 = new QLabel("操作结果:", this);
@@ -351,7 +360,8 @@ void SendCmdWidget::showOperateResult(quint8 cmd, const QVariantMap &info, QLine
     resultEdit->setText(strRes);
 
     if (cmd == SET_SLAVE_ADDR_CMD && result) {
-        m_handleData->setSlaveAddress(static_cast<quint8>(m_inputSlaveAddress->text().toInt()));
+        auto handleData = qobject_cast<Handler32data *>(m_handleData);
+        handleData->setSlaveAddress(static_cast<quint8>(m_inputSlaveAddress->text().toInt()));
     }
 
     Q_EMIT cmdCompleted(cmd);
@@ -397,4 +407,123 @@ void SendCmdWidget::stepCompleted(quint8 cmd)
             qWarning() << "insert or update r32 record value failed!:" << m_r32RecordValue.toString();
         }
     }
+}
+
+void SendCmdWidget::sendCmdData(quint8 cmd, const QVariantMap &info)
+{
+
+}
+
+void SendCmdWidget::initReadNTCInfoUI()
+{
+    m_showADCValue = new QLineEdit(this);
+    m_showADCValue->setReadOnly(true);
+    m_showADCValue->setPlaceholderText("显示ADC值");
+    m_showTemperatureValue = new QLineEdit(this);
+    m_showTemperatureValue->setReadOnly(true);
+    m_showTemperatureValue->setPlaceholderText("显示温度值");
+
+    auto *btn = new DelayedButton("读取NTC的ADC和温度", this);
+    //btn->setFixedWidth(190);
+    m_delayBtnList.append(btn);
+    btn->installEventFilter(this);
+    connect(btn, &DelayedButton::clicked, this, [this]{
+        m_showADCValue->clear();
+        m_showTemperatureValue->clear();
+
+        sendCmdData(NTC_CMD);
+    });
+
+    auto *label = new QLabel("ADC值:", this);
+    auto *label1 = new QLabel("温度值:", this);
+
+    auto *hLayout = new QHBoxLayout();
+    hLayout->addWidget(btn);
+    hLayout->addWidget(label);
+    hLayout->addWidget(m_showADCValue);
+    hLayout->addWidget(label1);
+    hLayout->addWidget(m_showTemperatureValue);
+
+    m_mainLayout->addLayout(hLayout);
+}
+
+void SendCmdWidget::initReadR32InfoUI()
+{
+    m_showR32ADCValue = new QLineEdit(this);
+    m_showR32ADCValue->setReadOnly(true);
+    m_showR32ADCValue->setPlaceholderText("显示ADC值");
+    m_showR32NDValue = new QLineEdit(this);
+    m_showR32NDValue->setReadOnly(true);
+    m_showR32NDValue->setPlaceholderText("显示浓度值");
+
+    auto *btn = new DelayedButton("R32采样", this);
+    //btn->setFixedWidth(190);
+    btn->setObjectName(CMD4_OBJECT_NAME);
+    m_delayBtnList.append(btn);
+    btn->installEventFilter(this);
+    connect(btn, &DelayedButton::delayedClicked, this, [this]{
+        m_showR32ADCValue->clear();
+        m_showR32NDValue->clear();
+
+        if (m_serialPortCom->isSerialPortOpen() && !m_timer->isActive()) {
+            m_timer->start();
+        }
+
+        sendCmdData(R32_CMD);
+    });
+
+    m_timer->setSingleShot(false);
+    // TODO 可配置
+    m_timer->setInterval(1 * 1000); // 1s
+
+    connect(m_timer, &QTimer::timeout, this, [btn, this]{
+        if (!m_serialPortCom->isSerialPortOpen()) {
+            m_timer->stop();
+            m_showR32ADCValue->clear();
+            m_showR32NDValue->clear();
+            return;
+        }
+
+        // 模拟按钮点击，相当于定时获取数据
+        emit btn->delayedClicked();
+    });
+
+    auto *label = new QLabel("ADC值:", this);
+    auto *label1 = new QLabel("浓度值:", this);
+
+    auto *hLayout = new QHBoxLayout();
+    hLayout->addWidget(btn);
+    hLayout->addWidget(label);
+    hLayout->addWidget(m_showR32ADCValue);
+    hLayout->addWidget(label1);
+    hLayout->addWidget(m_showR32NDValue);
+
+    m_mainLayout->addLayout(hLayout);
+}
+
+void SendCmdWidget::showNTCInfo(quint8 cmd, const QVariantMap &info)
+{
+    if (!info.contains(ADC_VALUE) || !info.contains(TEMPERATURE)) {
+        qWarning() << "show-read-NTC-info error:" << info;
+        return;
+    }
+
+    Q_EMIT ntcTemperatureValue(info[TEMPERATURE].toString());
+
+    m_showADCValue->setText(info[ADC_VALUE].toString());
+    m_showTemperatureValue->setText(info[TEMPERATURE].toString());
+    Q_EMIT cmdCompleted(cmd);
+}
+
+void SendCmdWidget::showR32Info(quint8 cmd, const QVariantMap &info) {
+    if (!info.contains(ADC_VALUE) || !info.contains(CONCENTRATION)) {
+        qWarning() << "show-read-R32-info error:" << info;
+        return;
+    }
+
+    Q_EMIT r32NDValue(info[CONCENTRATION].toInt());
+
+    m_showR32ADCValue->setText(info[ADC_VALUE].toString());
+    m_showR32NDValue->setText(info[CONCENTRATION].toString());
+    Q_EMIT cmdCompleted(cmd);
 }

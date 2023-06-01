@@ -12,7 +12,7 @@ StepWidget::StepWidget(const QString &text, QWidget *parent)
 {
     QFontMetrics fontMetrics(font());
     int textWidth = fontMetrics.horizontalAdvance(text);
-    int width = textWidth + 36;
+    int width = textWidth + 75;
     setFixedWidth(width);
     setMinimumHeight(40);
 }

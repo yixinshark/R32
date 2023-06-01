@@ -6,6 +6,10 @@
 #include "serialportsettingswidget.h"
 #include "sendcmdwidget.h"
 #include "recvr32datawidget.h"
+#include "mcuoperatewidget.h"
+
+#include "handler32data.h"
+#include "handlemcudata.h"
 
 #include <QLabel>
 #include <QGroupBox>
@@ -15,10 +19,16 @@
 
 OperateWidget::OperateWidget(QWidget *parent)
     : QWidget(parent)
-    , m_sendCmdWidget(new SendCmdWidget(this))
-    , m_recvR32DataWidget(new RecvR32DataWidget(this))
     , m_msgLabel(new QLabel(this))
 {
+
+    auto *handlerMcuData = new HandleMcuData(this);
+    auto *handler32Data = new Handler32data(this);
+
+    m_sendCmdWidget = new SendCmdWidget(handler32Data, this);
+    m_recvR32DataWidget = new RecvR32DataWidget(handler32Data, this);
+    m_mcuOperateWidget = new McuOperateWidget(handlerMcuData, this);
+
     initUI();
 
     connect(m_sendCmdWidget, &SendCmdWidget::operatedMsg, this, &OperateWidget::showMsg);
@@ -35,14 +45,14 @@ OperateWidget::~OperateWidget()
 void OperateWidget::initUI()
 {
     auto *mainLayout = new QVBoxLayout();
-    mainLayout->setSpacing(20);
+//    mainLayout->setSpacing(10);
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
     // 添加一个groupbox
     auto *groupBox = new QGroupBox(tr("R32传感器"), this);
 
     auto *vLayout = new QHBoxLayout();
-    vLayout->setContentsMargins(0, 0, 0, 10);
+    vLayout->setContentsMargins(0, 0, 0, 1);
     vLayout->addWidget(m_sendCmdWidget);
     groupBox->setLayout(vLayout);
     mainLayout->addWidget(groupBox);
@@ -54,10 +64,24 @@ void OperateWidget::initUI()
     r32VLayout->setContentsMargins(0, 0, 0, 0);
     r32VLayout->addWidget(m_recvR32DataWidget);
     r32GroupBox->setLayout(r32VLayout);
-    mainLayout->addWidget(r32GroupBox);
+//    mainLayout->addWidget(r32GroupBox);
 
+    // 添加一个groupbox
+    auto *mcuGroupBox = new QGroupBox(tr("MCU单片机操作"), this);
 
-    mainLayout->addStretch();
+    auto *mcuVLayout = new QHBoxLayout();
+    mcuVLayout->setContentsMargins(0, 0, 0, 0);
+    mcuVLayout->addWidget(m_mcuOperateWidget);
+    mcuGroupBox->setLayout(mcuVLayout);
+//    mainLayout->addWidget(mcuGroupBox);
+
+    auto *hLayout = new QHBoxLayout();
+    hLayout->setContentsMargins(0, 0, 0, 0);
+    hLayout->addWidget(r32GroupBox);
+    hLayout->addWidget(mcuGroupBox);
+    mainLayout->addLayout(hLayout);
+
+    //mainLayout->addStretch();
     mainLayout->addWidget(m_msgLabel);
 
     setLayout(mainLayout);

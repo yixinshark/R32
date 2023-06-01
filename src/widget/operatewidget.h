@@ -9,9 +9,11 @@
 
 class SendCmdWidget;
 class RecvR32DataWidget;
+class McuOperateWidget;
 
 class QLabel;
-class OperateWidget : public QWidget {
+class OperateWidget : public QWidget
+{
 Q_OBJECT
 
 public:
@@ -25,6 +27,7 @@ private:
 private:
     SendCmdWidget *m_sendCmdWidget;
     RecvR32DataWidget *m_recvR32DataWidget;
+    McuOperateWidget *m_mcuOperateWidget;
 
     QLabel *m_msgLabel;
 };

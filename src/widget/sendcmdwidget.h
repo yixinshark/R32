@@ -21,15 +21,20 @@ class SendCmdWidget : public OperateBaseWidget
 {
     Q_OBJECT
 public:
-    explicit SendCmdWidget(QWidget *parent = nullptr);
+    explicit SendCmdWidget(HandleDataBase *handleData, QWidget *parent = nullptr);
     ~SendCmdWidget() override;
 
-public slots:
+signals:
+    void r32NDValue(quint16 nd);
+    void ntcTemperatureValue(const QString &temperture);
+
+public:
     void setNDValue(quint16 nd);
     void setNTCTemperature(const QString &temperture);
 
 protected:
     void recvAckData(quint8 cmd, const QVariantMap &info);
+    void sendCmdData(quint8 cmd, const QVariantMap &info = QVariantMap()) override;
 
 private:
     void initUI();
@@ -49,6 +54,10 @@ private:
     void initSetLDUI();
     // 浓度标定
     void initSetNDUI();
+    // 读取NTC信息
+    void initReadNTCInfoUI();
+    // 读取R32信息
+    void initReadR32InfoUI();
 
 private:
     void showProductSlaveAddress(quint8 cmd, const QVariantMap &info);
@@ -56,6 +65,9 @@ private:
     void showSoftwareVersion(quint8 cmd, const QVariantMap &info);
     void showOperateResult(quint8 cmd, const QVariantMap &info, QLineEdit *resultEdit);
     void stepCompleted(quint8 cmd);
+
+    void showNTCInfo(quint8 cmd, const QVariantMap &info);
+    void showR32Info(quint8 cmd, const QVariantMap &info);
 
 private:
     R32RecordValue m_r32RecordValue;
@@ -86,6 +98,15 @@ private:
     QLineEdit *m_showSetNDResult;
     // 显示读取产品的ID号(唯一识别码)结果
     QLineEdit *m_showSetProductIDResult;
+
+    QTimer *m_timer;
+     // NTC
+    QLineEdit *m_showADCValue;
+    QLineEdit *m_showTemperatureValue;
+
+    // R32
+    QLineEdit *m_showR32ADCValue;
+    QLineEdit *m_showR32NDValue;
 };
 
 #endif //R32_SENDCMDWIDGET_H

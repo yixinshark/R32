@@ -7,37 +7,32 @@
 #include "statuswidget.h"
 #include "delayedbutton.h"
 
-#include "../serialport/handledata.h"
-#include "../serialport/serialportcom.h"
-#include "../serialport/constant.h"
+#include "handledatabase.h"
+#include "serialportcom.h"
 
 #include <QDebug>
 #include <QTimer>
 #include <QEvent>
-#include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QSerialPort>
 
-OperateBaseWidget::OperateBaseWidget(QWidget *parent)
+OperateBaseWidget::OperateBaseWidget(HandleDataBase *handleData, QWidget *parent)
     : QWidget(parent)
-    , m_timer(new QTimer(this))
     , m_connectBtn(new QPushButton("连接", this))
     , m_cntStatusWidget(new StatusWidget(this))
     , m_serialPortSettings(new SerialPortSettingsWidget(this))
     , m_serialPortCom(new SerialPortCom(this))
-    , m_handleData(new HandleData(this))
+    , m_handleData(handleData)
 {
     m_connectBtn->setObjectName("connect");
-    m_timer->setSingleShot(false);
-    // TODO 可配置
-    m_timer->setInterval(1 * 1000); // 1s
+
 
     connect(m_serialPortCom, &SerialPortCom::dataReceived,
-            m_handleData, &HandleData::processReceivedData);
+            m_handleData, &HandleDataBase::processReceivedData);
 
-    connect(m_handleData, &HandleData::recvedFrameData, this, [this](const QByteArray &data){
+    connect(m_handleData, &HandleDataBase::recvedFrameData, this, [this](const QByteArray &data){
         operateMsg("接收到数据:" + data.toHex());
     });
 
@@ -78,6 +73,7 @@ QLayout *OperateBaseWidget::initSerialPortUI()
     hLayout->setContentsMargins(0, 0, 0, 0);
     hLayout->addWidget(m_serialPortSettings);
 
+#if 1
     auto *vLayout = new QVBoxLayout();
     vLayout->setSpacing(5);
     vLayout->setContentsMargins(0, 0, 0, 0);
@@ -85,7 +81,10 @@ QLayout *OperateBaseWidget::initSerialPortUI()
     vLayout->addWidget(m_connectBtn);
 
     hLayout->addLayout(vLayout);
-
+#else
+    hLayout->addWidget(m_cntStatusWidget);
+    hLayout->addWidget(m_connectBtn);
+#endif
     return  hLayout;
 }
 
@@ -149,29 +148,6 @@ void OperateBaseWidget::operateMsg(const QString &msg)
     Q_EMIT operatedMsg(msg);
 }
 
-void OperateBaseWidget::sendDataBtnClicked(const QVariantMap &info)
-{
-    auto *btn = qobject_cast<DelayedButton *>(sender());
-    if (!btn) {
-        return;
-    }
-
-    QString objectName = btn->objectName();
-    if (!ObjectNameCmdMap.contains(objectName)) {
-        qWarning() << "send data btn objectName error:" << objectName;
-        return;
-    }
-
-    int cmd = ObjectNameCmdMap.value(objectName);
-    QByteArray data = m_handleData->getSendData(cmd, info);
-    qInfo() << "send cmd: " << cmd << " data:" << data;
-
-    QString msg = QString("%1发送数据:").arg(m_serialPortCom->isSerialPortOpen() ? " " : "串口未打开,未");
-    operateMsg(msg + data.toHex());
-
-    m_serialPortCom->sendData(data);
-}
-
 bool OperateBaseWidget::eventFilter(QObject *watched, QEvent *event)
 {
     if(event->type() == QEvent::MouseButtonPress) {
@@ -189,127 +165,13 @@ bool OperateBaseWidget::eventFilter(QObject *watched, QEvent *event)
     return QObject::eventFilter(watched, event);
 }
 
-QLayout *OperateBaseWidget::initReadNTCInfoUI()
+void OperateBaseWidget::sendCmdData(quint8 cmd, const QVariantMap &info)
 {
-    m_showADCValue = new QLineEdit(this);
-    m_showADCValue->setReadOnly(true);
-    m_showADCValue->setPlaceholderText("显示ADC值");
-    m_showTemperatureValue = new QLineEdit(this);
-    m_showTemperatureValue->setReadOnly(true);
-    m_showTemperatureValue->setPlaceholderText("显示温度值");
+    QByteArray data = m_handleData->getSendData(cmd, info);
+    qInfo() << "send cmd: " << cmd << " data:" << data;
 
-    auto *btn = new DelayedButton("读取NTC的ADC和温度", this);
-    //btn->setFixedWidth(190);
-    btn->setObjectName(CMD3_OBJECT_NAME);
-    m_delayBtnList.append(btn);
-    btn->installEventFilter(this);
-    connect(btn, &DelayedButton::clicked, this, [this]{
-        m_showADCValue->clear();
-        m_showTemperatureValue->clear();
+    QString msg = QString("%1发送数据:").arg(m_serialPortCom->isSerialPortOpen() ? " " : "串口未打开,未");
+    operateMsg(msg + data.toHex());
 
-        sendDataBtnClicked();
-    });
-
-    auto *label = new QLabel("ADC值:", this);
-    auto *label1 = new QLabel("温度值:", this);
-
-    auto *hLayout = new QHBoxLayout();
-    hLayout->addWidget(btn);
-    hLayout->addWidget(label);
-    hLayout->addWidget(m_showADCValue);
-    hLayout->addWidget(label1);
-    hLayout->addWidget(m_showTemperatureValue);
-
-    return hLayout;
-}
-
-QLayout *OperateBaseWidget::initReadR32InfoUI(const QString &btnTitle)
-{
-    m_showR32ADCValue = new QLineEdit(this);
-    m_showR32ADCValue->setReadOnly(true);
-    m_showR32ADCValue->setPlaceholderText("显示ADC值");
-    m_showR32NDValue = new QLineEdit(this);
-    m_showR32NDValue->setReadOnly(true);
-    m_showR32NDValue->setPlaceholderText("显示浓度值");
-
-    auto *btn = new DelayedButton(btnTitle, this);
-    //btn->setFixedWidth(190);
-    btn->setObjectName(CMD4_OBJECT_NAME);
-    m_delayBtnList.append(btn);
-    btn->installEventFilter(this);
-    connect(btn, &DelayedButton::delayedClicked, this, [this]{
-        m_showR32ADCValue->clear();
-        m_showR32NDValue->clear();
-
-        if (m_serialPortCom->isSerialPortOpen() && !m_timer->isActive()) {
-            m_timer->start();
-        }
-
-        sendDataBtnClicked();
-    });
-
-    connect(m_timer, &QTimer::timeout, this, [btn, this]{
-        if (!m_serialPortCom->isSerialPortOpen()) {
-            m_timer->stop();
-            m_showR32ADCValue->clear();
-            m_showR32NDValue->clear();
-            return;
-        }
-
-        // 模拟按钮点击，相当于定时获取数据
-        emit btn->delayedClicked();
-    });
-
-    auto *label = new QLabel("ADC值:", this);
-    auto *label1 = new QLabel("浓度值:", this);
-
-    auto *hLayout = new QHBoxLayout();
-    hLayout->addWidget(btn);
-    hLayout->addWidget(label);
-    hLayout->addWidget(m_showR32ADCValue);
-    hLayout->addWidget(label1);
-    hLayout->addWidget(m_showR32NDValue);
-
-    return hLayout;
-}
-
-void OperateBaseWidget::recvAckData(quint8 cmd, const QVariantMap &info)
-{
-    qInfo() << Q_FUNC_INFO << cmd << info;
-    switch (cmd) {
-        case NTC_CMD:
-            showNTCInfo(cmd, info);
-            break;
-        case R32_CMD:
-            showR32Info(cmd, info);
-            break;
-    }
-}
-
-void OperateBaseWidget::showNTCInfo(quint8 cmd, const QVariantMap &info)
-{
-    if (!info.contains(ADC_VALUE) || !info.contains(TEMPERATURE)) {
-        qWarning() << "show-read-NTC-info error:" << info;
-        return;
-    }
-
-    Q_EMIT ntcTemperatureValue(info[TEMPERATURE].toString());
-
-    m_showADCValue->setText(info[ADC_VALUE].toString());
-    m_showTemperatureValue->setText(info[TEMPERATURE].toString());
-    Q_EMIT cmdCompleted(cmd);
-}
-
-void OperateBaseWidget::showR32Info(quint8 cmd, const QVariantMap &info)
-{
-    if (!info.contains(ADC_VALUE) || !info.contains(CONCENTRATION)) {
-        qWarning() << "show-read-R32-info error:" << info;
-        return;
-    }
-
-    Q_EMIT r32NDValue(info[CONCENTRATION].toInt());
-
-    m_showR32ADCValue->setText(info[ADC_VALUE].toString());
-    m_showR32NDValue->setText(info[CONCENTRATION].toString());
-    Q_EMIT cmdCompleted(cmd);
+    m_serialPortCom->sendData(data);
 }

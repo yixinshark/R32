@@ -7,9 +7,9 @@
 
 #include <QWidget>
 
-class StatusWidget : public QWidget {
-Q_OBJECT
-
+class StatusWidget : public QWidget
+{
+    Q_OBJECT
 public:
     explicit StatusWidget(QWidget *parent = nullptr);
     ~StatusWidget() override;

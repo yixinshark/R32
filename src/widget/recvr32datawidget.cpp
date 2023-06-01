@@ -5,20 +5,22 @@
 #include "recvr32datawidget.h"
 #include "delayedbutton.h"
 
-#include "../serialport/handledata.h"
-#include "../serialport/constant.h"
+#include "handledatabase.h"
+#include "constant.h"
+#include "serialportcom.h"
 
+#include <QTimer>
 #include <QDebug>
 #include <QLabel>
 #include <QLineEdit>
 #include <QVBoxLayout>
 
-RecvR32DataWidget::RecvR32DataWidget(QWidget *parent)
-    : OperateBaseWidget(parent)
+RecvR32DataWidget::RecvR32DataWidget(HandleDataBase *handleData, QWidget *parent)
+    : OperateBaseWidget(handleData, parent)
     , m_mainLayout(new QVBoxLayout(this))
 {
     initUI();
-    connect(m_handleData, &HandleData::frameReceived, this, &RecvR32DataWidget::recvAckData);
+    connect(m_handleData, &HandleDataBase::frameReceived, this, &RecvR32DataWidget::recvAckData);
 }
 
 RecvR32DataWidget::~RecvR32DataWidget()
@@ -35,5 +37,82 @@ void RecvR32DataWidget::initUI()
     m_mainLayout->addLayout(layout);
 
     //initReadNTCInfoUI();
-    m_mainLayout->addLayout(initReadR32InfoUI("读取R32的ADC和浓度"));
+    initReadR32InfoUI();
+    m_mainLayout->addStretch();
+}
+
+void RecvR32DataWidget::initReadR32InfoUI()
+{
+    auto *timer = new QTimer(this);
+    timer->setSingleShot(false);
+    // TODO 可配置
+    timer->setInterval(1 * 1000); // 1s
+
+    m_showR32ADCValue = new QLineEdit(this);
+    m_showR32ADCValue->setReadOnly(true);
+    m_showR32ADCValue->setPlaceholderText("显示ADC值");
+    m_showR32NDValue = new QLineEdit(this);
+    m_showR32NDValue->setReadOnly(true);
+    m_showR32NDValue->setPlaceholderText("显示浓度值");
+
+    auto *btn = new DelayedButton("读取R32的ADC和浓度", this);
+    //btn->setFixedWidth(190);
+    btn->setObjectName(CMD4_OBJECT_NAME);
+    m_delayBtnList.append(btn);
+    btn->installEventFilter(this);
+    connect(btn, &DelayedButton::delayedClicked, this, [this, timer]{
+        m_showR32ADCValue->clear();
+        m_showR32NDValue->clear();
+
+        if (m_serialPortCom->isSerialPortOpen() && !timer->isActive()) {
+            timer->start();
+        }
+
+        sendCmdData(R32_CMD);
+    });
+
+    connect(timer, &QTimer::timeout, this, [btn, timer, this]{
+        if (!m_serialPortCom->isSerialPortOpen()) {
+            timer->stop();
+            m_showR32ADCValue->clear();
+            m_showR32NDValue->clear();
+            return;
+        }
+
+        // 模拟按钮点击，相当于定时获取数据
+        emit btn->delayedClicked();
+    });
+
+    auto *label = new QLabel("ADC值:", this);
+    auto *label1 = new QLabel("浓度值:", this);
+
+    auto *hLayout = new QHBoxLayout();
+    hLayout->addWidget(btn);
+    hLayout->addWidget(label);
+    hLayout->addWidget(m_showR32ADCValue);
+    hLayout->addWidget(label1);
+    hLayout->addWidget(m_showR32NDValue);
+
+    m_mainLayout->addLayout(hLayout);
+}
+
+void RecvR32DataWidget::recvAckData(quint8 cmd, const QVariantMap &info)
+{
+    qInfo() << Q_FUNC_INFO << cmd << info;
+    if (cmd == R32_CMD) {
+        showR32Info(info);
+    }
+}
+
+void RecvR32DataWidget::showR32Info(const QVariantMap &info)
+{
+    if (!info.contains(ADC_VALUE) || !info.contains(CONCENTRATION)) {
+        qWarning() << "show-read-R32-info error:" << info;
+        return;
+    }
+
+    Q_EMIT r32NDValue(info[CONCENTRATION].toInt());
+
+    m_showR32ADCValue->setText(info[ADC_VALUE].toString());
+    m_showR32NDValue->setText(info[CONCENTRATION].toString());
 }
