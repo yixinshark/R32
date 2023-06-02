@@ -60,6 +60,8 @@ OperateBaseWidget::OperateBaseWidget(HandleDataBase *handleData, QWidget *parent
             m_connectBtn->setEnabled(true);
         });
     });
+
+    connect(m_handleData, &HandleDataBase::frameReceived, this, &OperateBaseWidget::recvAckData);
 }
 
 OperateBaseWidget::~OperateBaseWidget()

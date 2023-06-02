@@ -66,6 +66,8 @@ const QString SEND_ALARM_THRESHOLD = "alarm_threshold";
 // --------------------------ack--------------------------------
 const QString ACK_RESULT = "result";
 const QString ACK_ERROR = "error";
+const QString ACK_FLOAT_VALUE = "float_value";
+
 // 标定的零点阻值R0
 const QString ACK_R0_VALUE = "R0_value";
 // 标定参数1
@@ -95,6 +97,9 @@ const QString ACK_ALARM_STATUS = "alarm_status";
 
 // 固件版本号
 const QString ACK_FIRMWARE_VERSION = "firmware_version";
+// 副版本号
+const QString ACK_FIRMWARE_SUB_VERSION = "firmware_sub_version";
+
 // 打开或者关闭周期性打印数据 0x42
 const QString ACK_PRINT_STATUS = "print_status";
 

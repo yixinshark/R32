@@ -6,6 +6,7 @@
 #include "delayedbutton.h"
 #include "r32constant.h"
 
+#include <QDebug>
 #include <QGridLayout>
 #include <QLineEdit>
 #include <QRadioButton>
@@ -381,5 +382,89 @@ void OperateR32Widget::initBroadcastCmdUI()
 
 void OperateR32Widget::recvAckData(quint8 cmd, const QVariantMap &info)
 {
+    qInfo() << "OperateR32Widget::recvAckData" << cmd << info;
+    switch (cmd) {
+        case CMD_01:
+            if (info.value(MODULE_ADDRESS).toBool()) {
+                showOperationResult(info, m_setModuleAddressResultEdit);
+            } else {
+                showOperationResult(info, m_calibrationResultEdit);
+            }
+            break;
+        case CMD_02:
+            if (info.value(MODULE_ADDRESS).toBool()) {
+                quint8 address = static_cast<quint8>(info.value(READ_MODULE_ADDRESS).toUInt());
+                m_readModuleAddressResultEdit->setText("0x" + QString::number(address, 16));
+            } else {
+                showOperationResult(info, m_calFinishResultEdit);
+            }
+            break;
+        case CMD_ND_STATUS_03:
+            showOperationResult(info, m_calStatusResultEdit);
+            break;
+        case CMD_READ_R0_04:
+            showOperationData(cmd, info, m_readZeroResResultEdit);
+            break;
+        case CMD_READ_PARAM1_05:
+            showOperationData(cmd, info, m_readCalP1ResultEdit);
+            break;
+        case CMD_READ_PARAM2_06:
+            showOperationData(cmd, info, m_readCalP2ResultEdit);
+            break;
+        case CMD_READ_1000PPM_07:
+            showOperationData(cmd, info, m_readCalP3ResultEdit);
+            break;
+        case CMD_READ_5000PPM_08:
+            showOperationData(cmd, info, m_readCalP4ResultEdit);
+            break;
+        case CMD_READ_TEMP_HUM_21:
+            m_curTempResultEdit->setText(QString::number(info.value(ACK_TEMPERATURE).toFloat()));
+            m_curHumidityResultEdit->setText(QString::number(info.value(ACK_HUMIDITY).toFloat()));
+            break;
+        case CMD_READ_ADC_22:
+            m_curGasADCResultEdit->setText(QString::number(info.value(ACK_ADC_VALUE).toUInt()));
+            break;
+        case CMD_READ_RESISTANCE_23:
+            showOperationData(cmd, info, m_gasResResultEdit);
+            break;
+        case CMD_READ_COMPENSATION_RESISTANCE_24:
+            showOperationData(cmd, info, m_compensateResResultEdit);
+            break;
+        case CMD_READ_GAS_CONCENTRATION_25:
+            m_concentrationResultEdit->setText(QString::number(info.value(ACK_GAS_CONCENTRATION).toUInt()));
+            m_alarmStatusResultEdit->setText(info.value(ACK_ALARM_STATUS).toString());
+            break;
+        case CMD_READ_FIRMWARE_VERSION_41:
+            m_mainVersionResultEdit->setText(QString::number(info.value(ACK_FIRMWARE_VERSION).toUInt()));
+            m_subVersionResultEdit->setText(QString::number(info.value(ACK_FIRMWARE_SUB_VERSION).toUInt()));
+            break;
+        case CMD_OPEN_CLOSE_PRINT_42:
+            showOperationResult(info, m_printDataSwitchResultEdit);
+            break;
+        case CMD_QUERY_FAULT_STATUS_43:
+            m_readFaultCodeResultEdit->setText(info.value(ACK_ERROR).toString());
+            break;
+        case CMD_SET_ALARM_THRESHOLD_44:
+            showOperationResult(info, m_setAlarmThresholdResultEdit);
+            break;
+        default:
+            qWarning() << "unknown OperateR32Widget::recvAckData" << cmd << info;
+            break;
+    }
+}
 
+void OperateR32Widget::showOperationResult(const QVariantMap &info, QLineEdit *showEdit)
+{
+    if (info.value(ACK_RESULT).toString() == "成功") {
+        showEdit->setText("操作成功");
+    } else {
+        showEdit->setText(info.value(ACK_ERROR).toString());
+    }
+}
+
+void OperateR32Widget::showOperationData(char cmd, const QVariantMap &info, QLineEdit *showEdit)
+{
+    Q_UNUSED(cmd)
+    float data = info.value(ACK_FLOAT_VALUE).toFloat();
+    showEdit->setText(QString::number(data));
 }

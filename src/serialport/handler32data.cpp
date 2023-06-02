@@ -289,19 +289,19 @@ bool Handler32data::readOperateData(quint8 cmd, const QByteArray &data, QVariant
 
     switch (cmd) {
         case CMD_READ_R0_04:
-            value.insert(ACK_R0_VALUE, fData);
+            value.insert(ACK_FLOAT_VALUE, fData);
             break;
         case CMD_READ_PARAM1_05:
-            value.insert(ACK_PARAM1_VALUE, fData);
+            value.insert(ACK_FLOAT_VALUE, fData);
             break;
         case CMD_READ_PARAM2_06:
-            value.insert(ACK_PARAM2_VALUE, fData);
+            value.insert(ACK_FLOAT_VALUE, fData);
             break;
         case CMD_READ_1000PPM_07:
-            value.insert(ACK_1000PPM_VALUE, fData);
+            value.insert(ACK_FLOAT_VALUE, fData);
             break;
         case CMD_READ_5000PPM_08:
-            value.insert(ACK_5000PPM_VALUE, fData);
+            value.insert(ACK_FLOAT_VALUE, fData);
             break;
         default:
             qWarning() << "cmd:" << cmd << "not support:" << data.toHex();
@@ -360,11 +360,7 @@ bool Handler32data::readGasProbeResistance(quint8 cmd, const QByteArray &data, Q
     float resistance = 0;
     memcpy(&resistance, data.data(), 4);
 
-    if (cmd == CMD_READ_RESISTANCE_23) {
-        value.insert(ACK_RESISTANCE_VALUE, resistance);
-    } else if (cmd == CMD_READ_COMPENSATION_RESISTANCE_24) {
-        value.insert(ACK_COMPENSATION_RESISTANCE_VALUE, resistance);
-    }
+    value.insert(ACK_FLOAT_VALUE, resistance);
 
     return true;
 }
@@ -396,8 +392,6 @@ bool Handler32data::readGasConcentration(quint8 cmd, const QByteArray &data, QVa
                 break;
         }
 
-    value.insert(ACK_ALARM_STATUS, alarm);
-
     return true;
 }
 
@@ -413,7 +407,9 @@ bool Handler32data::readFirmwareVersion(quint8 cmd, const QByteArray &data, QVar
     quint8 mainVersion = static_cast<quint8>(data.at(0));
     quint8 subVersion = static_cast<quint8>(data.at(1));
     QString version = QString("%1.%2").arg(mainVersion).arg(subVersion);
-    value.insert(ACK_FIRMWARE_VERSION, version);
+    qInfo() << "version:" << version;
+    value.insert(ACK_FIRMWARE_VERSION, mainVersion);
+    value.insert(ACK_FIRMWARE_SUB_VERSION, subVersion);
 
     return true;
 }
@@ -567,6 +563,12 @@ bool Handler32data::addCmd_set_address_Content(const QVariantMap &info, QByteArr
     // 修改i地址字节，添加设置地址数据
     data[1] = 0x00;
     data.append(static_cast<char>(info.value(SET_MODULE_ADDRESS).toUInt()));
+
+    // 添加3字节 0x00
+    char noneByte = 0x00;
+    data.append(noneByte);
+    data.append(noneByte);
+    data.append(noneByte);
 
     return true;
 }

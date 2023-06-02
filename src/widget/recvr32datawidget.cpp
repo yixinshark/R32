@@ -20,7 +20,7 @@ RecvR32DataWidget::RecvR32DataWidget(HandleDataBase *handleData, QWidget *parent
     , m_gridLayout(new QGridLayout())
 {
     initUI();
-    connect(m_handleData, &HandleDataBase::frameReceived, this, &RecvR32DataWidget::recvAckData);
+//    connect(m_handleData, &HandleDataBase::frameReceived, this, &RecvR32DataWidget::recvAckData);
 }
 
 RecvR32DataWidget::~RecvR32DataWidget()

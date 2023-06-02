@@ -37,6 +37,10 @@ private:
     void initBroadcastCmdUI();
 
 private:
+    void showOperationResult(const QVariantMap &info, QLineEdit *showEdit);
+    void showOperationData(char cmd, const QVariantMap &info, QLineEdit *showEdit);
+
+private:
     QGridLayout *m_gridLayout;
     QVBoxLayout *m_mainLayout;
 
