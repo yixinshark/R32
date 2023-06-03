@@ -532,6 +532,11 @@ bool Handler32data::addCmd_enable_print_Content(const QVariantMap &info, QByteAr
     }
 
     data.append(static_cast<char>(info.value(SEND_PRINT_ENABLE).toUInt()));
+    // 补充3个字节 0x00
+    char noneByte = 0x00;
+    data.append(noneByte);
+    data.append(noneByte);
+    data.append(noneByte);
 
     return true;
 }
@@ -547,6 +552,11 @@ bool Handler32data::addCmd_set_alarm_threshold_Content(const QVariantMap &info, 
 
     data.append(static_cast<char>(alarmThreshold >> 8));
     data.append(static_cast<char>(alarmThreshold & 0xFF));
+
+    // 补充两个字节 0x00
+    char noneByte = 0x00;
+    data.append(noneByte);
+    data.append(noneByte);
 
     return true;
 }
