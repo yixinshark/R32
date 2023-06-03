@@ -38,13 +38,18 @@ QueryWidget::QueryWidget(QWidget *parent)
     connect(m_exportButton, &QPushButton::clicked, this, &QueryWidget::handleExportButton);
 }
 
-QueryWidget::~QueryWidget() {
+QueryWidget::~QueryWidget()
+{
 
 }
 
 void QueryWidget::initUI() {
     m_startTimeEdit->setDisplayFormat("yyyy-MM-dd hh:mm:ss");
     m_endTimeEdit->setDisplayFormat("yyyy-MM-dd hh:mm:ss");
+    m_startTimeEdit->setCalendarPopup(true);
+    m_endTimeEdit->setCalendarPopup(true);
+    m_startTimeEdit->setDateTime(QDateTime::currentDateTime().addDays(-1));
+    m_endTimeEdit->setDateTime(QDateTime::currentDateTime());
 
     m_concentrationEdit->setMaximumWidth(40);
     m_precisionEdit->setMaximumWidth(40);

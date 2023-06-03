@@ -39,6 +39,7 @@ private:
 private:
     void showOperationResult(const QVariantMap &info, QLineEdit *showEdit);
     void showOperationData(char cmd, const QVariantMap &info, QLineEdit *showEdit);
+    void showAlarmThreshold(const QVariantMap &info);
 
 private:
     QGridLayout *m_gridLayout;

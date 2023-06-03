@@ -514,6 +514,9 @@ void OperateR32Widget::recvAckData(quint8 cmd, const QVariantMap &info)
         case CMD_SET_ALARM_THRESHOLD_44:
             showOperationResult(info, m_setAlarmThresholdResultEdit);
             break;
+        case CMD_READ_ALARM_THRESHOLD_45:
+            showAlarmThreshold(info);
+            break;
         default:
             qWarning() << "unknown OperateR32Widget::recvAckData" << cmd << info;
             break;
@@ -534,4 +537,9 @@ void OperateR32Widget::showOperationData(char cmd, const QVariantMap &info, QLin
     Q_UNUSED(cmd)
     float data = info.value(ACK_FLOAT_VALUE).toFloat();
     showEdit->setText(QString::number(data));
+}
+
+void OperateR32Widget::showAlarmThreshold(const QVariantMap &info)
+{
+    m_readAlarmThresholdResultEdit->setText(QString::number(info.value(ACK_ALARM_THRESHOLD).toUInt()));
 }

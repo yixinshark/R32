@@ -56,6 +56,8 @@ private:
     bool readFirmwareVersion(quint8 cmd, const QByteArray &data, QVariantMap &value);
     // 查询产品的故障状态
     bool readProductFaultStatus(quint8 cmd, const QByteArray &data, QVariantMap &value);
+    // 读取报警阈值
+    bool readAlarmThreshold(quint8 cmd, const QByteArray &data, QVariantMap &value);
 
 private:
     typedef bool (Handler32data::*readFunc)(quint8 cmd, const QByteArray &data, QVariantMap &value);

@@ -120,7 +120,6 @@ void McuOperateWidget::initValveCtrlUI(int rowIndex)
 
         QVariantMap info;
         info.insert(MCU_VALVE, data);
-
         sendCmdData(MCU_CMD_VALVE, info);
     });
 }
@@ -256,9 +255,11 @@ void McuOperateWidget::recvAckData(quint8 cmd, const QVariantMap &info)
 
     switch (cmd) {
         case MCU_CMD_VALVE:
+            Q_EMIT valveStatusChanged(data);
             showValveCtrlStatus(data);
             break;
         case MCU_CMD_FAN:
+            Q_EMIT fanStatusChanged(data);
             showFanCtrlStatus(data);
             break;
         case MCU_CMD_ND:

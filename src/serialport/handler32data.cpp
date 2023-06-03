@@ -29,6 +29,7 @@ Handler32data::Handler32data(QObject *parent)
             {CMD_OPEN_CLOSE_PRINT_42, &Handler32data::readOperateResult},
             {CMD_QUERY_FAULT_STATUS_43, &Handler32data::readProductFaultStatus},
             {CMD_SET_ALARM_THRESHOLD_44, &Handler32data::readOperateResult},
+            {CMD_READ_ALARM_THRESHOLD_45, &Handler32data::readAlarmThreshold},
     };
 
 }
@@ -86,7 +87,7 @@ bool Handler32data::frameIsValid(const QByteArray &frameData) {
     int sumLow8 = static_cast<quint8>(frameData.at(frameData.length() - 1));
 
     int sum = 0;
-    for (int i = 0; i < frameData.length() - 2; ++i) {
+    for (int i = 0; i < frameData.length() - 1; ++i) {
         sum += frameData.at(i);
     }
 
@@ -107,10 +108,10 @@ bool Handler32data::readOperateResult(quint8 cmd, const QByteArray &data, QVaria
 
     // 读取浓度标定ack
     auto readNdAck = [](const QByteArray &data, QVariantMap &value) {
-        quint8 result = static_cast<quint8>(data.at(2));
+        quint8 result = static_cast<quint8>(data.at(0));
         value.insert(ACK_RESULT, result == 0 ? "成功" : "失败");
         if (result != 0) {
-            quint8 error = static_cast<quint8>(data.at(3));
+            quint8 error = static_cast<quint8>(data.at(1));
             switch (error) {
                 case 1:
                     value.insert(ACK_ERROR, "浓度超测量量程");
@@ -130,10 +131,10 @@ bool Handler32data::readOperateResult(quint8 cmd, const QByteArray &data, QVaria
 
     // 读取标定完成ack
     auto readCalibrationAck = [](const QByteArray &data, QVariantMap &value) {
-        quint8 result = static_cast<quint8>(data.at(2));
+        quint8 result = static_cast<quint8>(data.at(0));
         value.insert(ACK_RESULT, result == 0 ? "成功" : "失败");
         if (result != 0) {
-            quint8 error = static_cast<quint8>(data.at(3));
+            quint8 error = static_cast<quint8>(data.at(1));
             switch (error) {
                 case 1:
                     value.insert(ACK_ERROR, "标定的点数小于二");
@@ -150,7 +151,7 @@ bool Handler32data::readOperateResult(quint8 cmd, const QByteArray &data, QVaria
 
     // 查询标定状态ack
     auto readCalibrationStatusAck = [](const QByteArray &data, QVariantMap &value) {
-        quint8 result = static_cast<quint8>(data.at(2));
+        quint8 result = static_cast<quint8>(data.at(0));
         switch (result) {
             case 0:
                 value.insert(ACK_RESULT, "未标定");
@@ -172,10 +173,10 @@ bool Handler32data::readOperateResult(quint8 cmd, const QByteArray &data, QVaria
 
     // 打开或者关闭周期性打印数据
     auto readPrintDataAck = [](const QByteArray &data, QVariantMap &value) {
-        quint8 result = static_cast<quint8>(data.at(2));
+        quint8 result = static_cast<quint8>(data.at(0));
         value.insert(ACK_RESULT, result == 0 ? "成功" : "失败");
         if (result != 0) {
-            quint8 error = static_cast<quint8>(data.at(3));
+            quint8 error = static_cast<quint8>(data.at(1));
             switch (error) {
                 case 0:
                     value.insert(ACK_ERROR, "无错误");
@@ -192,10 +193,10 @@ bool Handler32data::readOperateResult(quint8 cmd, const QByteArray &data, QVaria
 
     // 设置报警阈值设置报警阈值
     auto readAlarmThresholdAck = [](const QByteArray &data, QVariantMap &value) {
-        quint8 result = static_cast<quint8>(data.at(2));
+        quint8 result = static_cast<quint8>(data.at(0));
         value.insert(ACK_RESULT, result == 0 ? "成功" : "失败");
         if (result != 0) {
-            quint8 error = static_cast<quint8>(data.at(3));
+            quint8 error = static_cast<quint8>(data.at(1));
             switch (error) {
                 case 0:
                     value.insert(ACK_ERROR, "无错误");
@@ -216,7 +217,7 @@ bool Handler32data::readOperateResult(quint8 cmd, const QByteArray &data, QVaria
     // 设置模块地址
     auto readSetAddressAck = [](const QByteArray &data, QVariantMap &value) {
         value.insert(MODULE_ADDRESS, true);
-        quint8 result = static_cast<quint8>(data.at(2));
+        quint8 result = static_cast<quint8>(data.at(0));
         value.insert(ACK_RESULT, result == 0 ? "成功" : "失败");
         if (result != 0) {
             quint8 error = static_cast<quint8>(data.at(3));
@@ -240,7 +241,7 @@ bool Handler32data::readOperateResult(quint8 cmd, const QByteArray &data, QVaria
     // 读取模块地址
     auto readAddressAck = [](const QByteArray &data, QVariantMap &value) {
         value.insert(MODULE_ADDRESS, true);
-        quint8 address = static_cast<quint8>(data.at(2));
+        quint8 address = static_cast<quint8>(data.at(0));
         value.insert(READ_MODULE_ADDRESS, address);
     };
 
@@ -286,6 +287,9 @@ bool Handler32data::readOperateData(quint8 cmd, const QByteArray &data, QVariant
     // 读取ack数值
     float fData = 0;
     memcpy(&fData, data.data(), 4);
+    // 4个字节的数据，高位在前，低位在后，使用左移和或运算
+//    fData = (static_cast<quint8>(data.at(0)) << 24) | (static_cast<quint8>(data.at(1)) << 16) |
+//            (static_cast<quint8>(data.at(2)) << 8) | (static_cast<quint8>(data.at(3)));
 
     switch (cmd) {
         case CMD_READ_R0_04:
@@ -520,6 +524,9 @@ bool Handler32data::addCmd_nd_Content(const QVariantMap &info, QByteArray &data)
     data.append(calPoint);
     data.append(static_cast<char>(calConcentration >> 8));
     data.append(static_cast<char>(calConcentration & 0xFF));
+    // 补充1个字节 0x00
+    char noneByte = 0x00;
+    data.append(noneByte);
 
     return true;
 }
@@ -579,6 +586,20 @@ bool Handler32data::addCmd_set_address_Content(const QVariantMap &info, QByteArr
     data.append(noneByte);
     data.append(noneByte);
     data.append(noneByte);
+
+    return true;
+}
+
+bool Handler32data::readAlarmThreshold(quint8 cmd, const QByteArray &data, QVariantMap &value)
+{
+    if (data.size() != 4) {
+        qWarning() << "error cmd data:" << cmd << data;
+        return false;
+    }
+
+    // 两个字节表示报警阈值
+    quint16 alarmThreshold = static_cast<quint16>(data[0] << 8 | data[1]);
+    value.insert(ACK_ALARM_THRESHOLD, alarmThreshold);
 
     return true;
 }

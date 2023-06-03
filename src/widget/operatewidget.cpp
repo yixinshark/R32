@@ -36,6 +36,10 @@ OperateWidget::OperateWidget(QWidget *parent)
     connect(m_recvR32DataWidget, &RecvR32DataWidget::operatedMsg, this, &OperateWidget::showMsg);
     connect(m_mcuOperateWidget, &McuOperateWidget::operatedMsg, this, &OperateWidget::showMsg);
 
+    connect(m_mcuOperateWidget, &McuOperateWidget::fanStatusChanged,
+            m_mcuCtrlStatusWidget, &McuCtrlStatusWidget::updateFanStatus);
+    connect(m_mcuOperateWidget, &McuOperateWidget::valveStatusChanged,
+            m_mcuCtrlStatusWidget, &McuCtrlStatusWidget::updateValveStatus);
 //    connect(m_recvR32DataWidget, &RecvR32DataWidget::r32NDValue, m_operateR32Widget, &OperateR32Widget::setNDValue);
 }
 

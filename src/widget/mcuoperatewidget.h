@@ -20,6 +20,10 @@ public:
     explicit McuOperateWidget(HandleDataBase *handleData, QWidget *parent = nullptr);
     ~McuOperateWidget() override;
 
+signals:
+    void fanStatusChanged(const QByteArray &data);
+    void valveStatusChanged(const QByteArray &data);
+
 protected:
     void recvAckData(quint8 cmd, const QVariantMap &info) override;
 

@@ -94,6 +94,8 @@ const QString ACK_COMPENSATION_RESISTANCE_VALUE = "compensation_resistance_value
 const QString ACK_GAS_CONCENTRATION = "gas_concentration";
 // 报警状态值
 const QString ACK_ALARM_STATUS = "alarm_status";
+// 报警阈值
+const QString ACK_ALARM_THRESHOLD = "alarm_threshold";
 
 // 固件版本号
 const QString ACK_FIRMWARE_VERSION = "firmware_version";
