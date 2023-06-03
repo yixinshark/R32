@@ -13,7 +13,6 @@
 #include <QDebug>
 #include <QTimer>
 #include <QEvent>
-#include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QSerialPort>
@@ -22,7 +21,6 @@ OperateBaseWidget::OperateBaseWidget(HandleDataBase *handleData, QWidget *parent
     : QWidget(parent)
     , m_connectBtn(new QPushButton("连接", this))
     , m_cntStatusWidget(new StatusWidget(this))
-    , m_serialPortSettings(new SerialPortSettingsWidget(this))
     , m_serialPortCom(new SerialPortCom(this))
     , m_handleData(handleData)
 {
@@ -69,25 +67,42 @@ OperateBaseWidget::~OperateBaseWidget()
 
 }
 
-QLayout *OperateBaseWidget::initSerialPortUI()
+QLayout *OperateBaseWidget::initSerialPortUI(SerialPortSettingsWidget::LayoutDirection direction)
 {
-    auto *hLayout = new QHBoxLayout();
-    hLayout->setContentsMargins(0, 0, 0, 0);
-    hLayout->addWidget(m_serialPortSettings);
+    m_serialPortSettings = new SerialPortSettingsWidget(direction, this);
 
-#if 1
-    auto *vLayout = new QVBoxLayout();
-    vLayout->setSpacing(5);
-    vLayout->setContentsMargins(0, 0, 0, 0);
-    vLayout->addWidget(m_cntStatusWidget);
-    vLayout->addWidget(m_connectBtn);
+    if (direction == SerialPortSettingsWidget::Horizontal) {
+        auto *hLayout = new QHBoxLayout();
+        hLayout->setContentsMargins(0, 0, 0, 0);
+        hLayout->addWidget(m_serialPortSettings);
 
-    hLayout->addLayout(vLayout);
-#else
-    hLayout->addWidget(m_cntStatusWidget);
-    hLayout->addWidget(m_connectBtn);
-#endif
-    return  hLayout;
+        auto *vLayout = new QVBoxLayout();
+        vLayout->setSpacing(5);
+        vLayout->setContentsMargins(0, 0, 0, 0);
+        vLayout->addWidget(m_cntStatusWidget);
+        vLayout->addWidget(m_connectBtn);
+
+        hLayout->addLayout(vLayout);
+
+        return  hLayout;
+    } else {
+        auto *vLayout = new QVBoxLayout();
+        vLayout->setContentsMargins(0, 15, 0, 0);
+        vLayout->addWidget(m_serialPortSettings);
+
+        m_cntStatusWidget->setMinimumWidth(60);
+        m_connectBtn->setSizePolicy(QSizePolicy::Expanding,
+                                    QSizePolicy::Ignored);
+        auto *hLayout = new QHBoxLayout();
+        hLayout->setSpacing(5);
+        hLayout->setContentsMargins(0, 0, 0, 0);
+        hLayout->addWidget(m_cntStatusWidget);
+        hLayout->addWidget(m_connectBtn);
+
+        vLayout->addLayout(hLayout);
+
+        return vLayout;
+    }
 }
 
 bool OperateBaseWidget::connectSerialPort()

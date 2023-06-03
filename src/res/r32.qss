@@ -31,6 +31,12 @@ QPushButton:pressed {
     background-color: #A0A0A0;
 }
 
+
+QGroupBox {
+    border: 2px solid lightgray;
+    border-radius:5px;
+}
+
 QGroupBox::title {
     font-size: 16px;
     font-weight: bold;

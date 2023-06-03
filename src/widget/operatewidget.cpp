@@ -3,11 +3,10 @@
 //
 
 #include "operatewidget.h"
-#include "serialportsettingswidget.h"
-//#include "sendcmdwidget.h"
 #include "recvr32datawidget.h"
 #include "mcuoperatewidget.h"
 #include "operater32widget.h"
+#include "mcuctrlstatuswidget.h"
 
 #include "handler32data.h"
 #include "handlemcudata.h"
@@ -29,6 +28,7 @@ OperateWidget::OperateWidget(QWidget *parent)
     m_operateR32Widget = new OperateR32Widget(handler32Data, this);
     m_recvR32DataWidget = new RecvR32DataWidget(handler32Data, this);
     m_mcuOperateWidget = new McuOperateWidget(handlerMcuData, this);
+    m_mcuCtrlStatusWidget = new McuCtrlStatusWidget(this);
 
     initUI();
 
@@ -46,8 +46,7 @@ OperateWidget::~OperateWidget()
 
 void OperateWidget::initUI()
 {
-    auto *mainLayout = new QVBoxLayout();
-//    mainLayout->setSpacing(10);
+    auto *mainLayout = new QVBoxLayout();;
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
     // 添加一个groupbox
@@ -66,7 +65,6 @@ void OperateWidget::initUI()
     r32VLayout->setContentsMargins(0, 0, 0, 0);
     r32VLayout->addWidget(m_recvR32DataWidget);
     r32GroupBox->setLayout(r32VLayout);
-//    mainLayout->addWidget(r32GroupBox);
 
     // 添加一个groupbox
     auto *mcuGroupBox = new QGroupBox(tr("MCU单片机操作"), this);
@@ -75,17 +73,22 @@ void OperateWidget::initUI()
     mcuVLayout->setContentsMargins(0, 0, 0, 0);
     mcuVLayout->addWidget(m_mcuOperateWidget);
     mcuGroupBox->setLayout(mcuVLayout);
-//    mainLayout->addWidget(mcuGroupBox);
 
     auto *hLayout = new QHBoxLayout();
     hLayout->setContentsMargins(0, 0, 0, 0);
     hLayout->addWidget(r32GroupBox);
     hLayout->addWidget(mcuGroupBox);
+
+    // 添加一个groupbox
+    auto *mcuCtrlGroupBox = new QGroupBox(tr("MCU单片机状态"), this);
+    auto *mcuCtrlVLayout = new QHBoxLayout();
+    mcuCtrlVLayout->setContentsMargins(0, 0, 0, 0);
+    mcuCtrlVLayout->addWidget(m_mcuCtrlStatusWidget);
+    mcuCtrlGroupBox->setLayout(mcuCtrlVLayout);
+    hLayout->addWidget(mcuCtrlGroupBox);
     mainLayout->addLayout(hLayout);
 
-    //mainLayout->addStretch();
     mainLayout->addWidget(m_msgLabel);
-
     setLayout(mainLayout);
 }
 

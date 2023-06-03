@@ -32,7 +32,7 @@ void RecvR32DataWidget::initUI()
 {
     auto *mainLayout = new QVBoxLayout(this);
     mainLayout->setSpacing(20);
-    auto *layout = initSerialPortUI();
+    auto *layout = initSerialPortUI(SerialPortSettingsWidget::Vertical);
     mainLayout->addLayout(layout);
 
     m_gridLayout->setSpacing(13);
@@ -88,11 +88,15 @@ void RecvR32DataWidget::initReadR32InfoUI()
     auto *label = new QLabel("ADC值:", this);
     auto *label1 = new QLabel("浓度值:", this);
 
-    m_gridLayout->addWidget(btn, 0, 0, 2, 1);
-    m_gridLayout->addWidget(label, 0, 1);
-    m_gridLayout->addWidget(m_showR32ADCValue, 0, 2);
-    m_gridLayout->addWidget(label1, 1, 1);
-    m_gridLayout->addWidget(m_showR32NDValue, 1, 2);
+    auto *hLayout = new QHBoxLayout();
+    hLayout->addWidget(btn);
+    hLayout->addStretch();
+
+    m_gridLayout->addLayout(hLayout, 0, 0, 1, 2);
+    m_gridLayout->addWidget(label, 1, 0);
+    m_gridLayout->addWidget(m_showR32ADCValue, 1, 1);
+    m_gridLayout->addWidget(label1, 2, 0);
+    m_gridLayout->addWidget(m_showR32NDValue, 2, 1);
 }
 
 void RecvR32DataWidget::recvAckData(quint8 cmd, const QVariantMap &info)

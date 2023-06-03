@@ -7,6 +7,7 @@
 
 #include <QWidget>
 #include <QVariantMap>
+#include "serialportsettingswidget.h"
 
 class QPushButton;
 class QLineEdit;
@@ -15,8 +16,10 @@ class DelayedButton;
 class StatusWidget;
 class HandleDataBase;
 class SerialPortCom;
-class SerialPortSettingsWidget;
 
+/**
+ * @brief 操作基类
+ */
 class OperateBaseWidget : public QWidget
 {
     Q_OBJECT
@@ -32,7 +35,7 @@ protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
 
 protected:
-    QLayout *initSerialPortUI();
+    QLayout *initSerialPortUI(SerialPortSettingsWidget::LayoutDirection direction = SerialPortSettingsWidget::Horizontal);
 
     // 发送数据
     virtual void sendCmdData(quint8 cmd, const QVariantMap &info = QVariantMap());

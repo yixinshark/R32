@@ -51,8 +51,13 @@ OperateR32Widget::~OperateR32Widget()
 void OperateR32Widget::initUI()
 {
     m_mainLayout->setSpacing(20);
-    m_gridLayout->setSpacing(10);
     m_mainLayout->addLayout(initSerialPortUI());
+
+    auto *widget = new QWidget(this);
+    m_gridLayout->setContentsMargins(0, 0, 0, 0);
+    widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    widget->setLayout(m_gridLayout);
+
     // 初始化标定类指令UI
     initCalibrationCmdUI();
     // 初始化读取参数类指令UI
@@ -65,7 +70,7 @@ void OperateR32Widget::initUI()
     // 初始化广播类指令UI
     initBroadcastCmdUI();
 
-    m_mainLayout->addLayout(m_gridLayout);
+    m_mainLayout->addWidget(widget);
 }
 
 void OperateR32Widget::initCalibrationCmdUI()

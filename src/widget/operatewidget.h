@@ -7,10 +7,10 @@
 
 #include <QWidget>
 
-//class SendCmdWidget;
 class OperateR32Widget;
 class RecvR32DataWidget;
 class McuOperateWidget;
+class McuCtrlStatusWidget;
 
 class QLabel;
 class OperateWidget : public QWidget
@@ -26,10 +26,10 @@ private:
     void showMsg(const QString &msg);
 
 private:
-//    SendCmdWidget *m_sendCmdWidget;
     OperateR32Widget *m_operateR32Widget;
     RecvR32DataWidget *m_recvR32DataWidget;
     McuOperateWidget *m_mcuOperateWidget;
+    McuCtrlStatusWidget *m_mcuCtrlStatusWidget;
 
     QLabel *m_msgLabel;
 };

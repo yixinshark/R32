@@ -32,7 +32,6 @@ McuOperateWidget::~McuOperateWidget()
 
 void McuOperateWidget::initUI()
 {
-    m_gridLayout->setSpacing(10);
     // 第一行
     initBoxSwitchUI(0);
     // 第二行
@@ -48,15 +47,14 @@ void McuOperateWidget::initUI()
 
     auto *mainLayout = new QVBoxLayout(this);
     mainLayout->setSpacing(20);
-//    mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->addLayout(initSerialPortUI());
-//    mainLayout->addLayout(m_gridLayout);
 
-    auto *hLayout = new QHBoxLayout();
-    hLayout->addLayout(m_gridLayout);
-    hLayout->addSpacerItem(new QSpacerItem(60, 20, QSizePolicy::Expanding, QSizePolicy::Expanding));
-    mainLayout->addLayout(hLayout);
-//    mainLayout->addStretch();
+    auto *widget = new QWidget(this);
+    m_gridLayout->setContentsMargins(0, 0, 0, 0);
+    widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    widget->setLayout(m_gridLayout);
+
+    mainLayout->addWidget(widget);
 }
 
 void McuOperateWidget::initBoxSwitchUI(int rowIndex)

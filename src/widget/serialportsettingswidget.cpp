@@ -12,8 +12,9 @@
 
 #include "serialportsettingswidget.h"
 
-SerialPortSettingsWidget::SerialPortSettingsWidget(QWidget *parent)
+SerialPortSettingsWidget::SerialPortSettingsWidget(LayoutDirection direction, QWidget *parent)
     : QWidget(parent)
+    , m_direction(direction)
     , m_portComboBox(new QComboBox(this))
     , m_baudRateComboBox(new QComboBox(this))
     , m_parityComboBox(new QComboBox(this))
@@ -23,7 +24,10 @@ SerialPortSettingsWidget::SerialPortSettingsWidget(QWidget *parent)
 #ifdef Q_OS_WIN
     styleForWindows();
 #endif
-    initUI();
+    if (m_direction == Horizontal)
+        initUI();
+    else if (m_direction == Vertical)
+        initVerticalUI();
 }
 
 SerialPortSettingsWidget::~SerialPortSettingsWidget()
@@ -48,7 +52,6 @@ void SerialPortSettingsWidget::initUI()
     m_portComboBox->installEventFilter(this);
     hLayout->addWidget(portLabel);
     hLayout->addWidget(m_portComboBox);
-//    hLayout->addStretch();
 
     // 波特率选择
     auto *baudRateLabel = new QLabel("波特率:", this);
@@ -82,7 +85,6 @@ void SerialPortSettingsWidget::initUI()
     hLayout->addWidget(m_stopBitsComboBox);
 
     mainLayout->addLayout(hLayout);
-//    mainLayout->addStretch();
 
     setLayout(mainLayout);
 }
@@ -182,4 +184,70 @@ void SerialPortSettingsWidget::styleForWindows()
 
     m_stopBitsComboBox->setView(new QListView(this));
     m_stopBitsComboBox->setMinimumHeight(25);
+}
+
+void SerialPortSettingsWidget::initVerticalUI()
+{
+    auto *mainLayout = new QVBoxLayout();
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+
+    auto *hLayout = new QHBoxLayout();
+    // 串口号选择
+    auto *portLabel = new QLabel("串  口:", this);
+    updateAvailablePorts();
+    m_portComboBox->installEventFilter(this);
+    m_portComboBox->setSizePolicy(QSizePolicy::Expanding,
+                                  QSizePolicy::Expanding);
+    hLayout->addWidget(portLabel);
+    hLayout->addWidget(m_portComboBox);
+    mainLayout->addLayout(hLayout);
+
+    auto *hLayout2 = new QHBoxLayout();
+    // 波特率选择
+    auto *baudRateLabel = new QLabel("波特率:", this);
+    m_baudRateComboBox->addItem("9600");
+    m_baudRateComboBox->addItem("115200");
+    m_baudRateComboBox->setSizePolicy(QSizePolicy::Expanding,
+                                      QSizePolicy::Expanding);
+    hLayout2->addWidget(baudRateLabel);
+    hLayout2->addWidget(m_baudRateComboBox);
+    mainLayout->addLayout(hLayout2);
+
+    auto *hLayout3 = new QHBoxLayout();
+    // 校验位选择
+    auto *parityLabel = new QLabel("校验位:");
+    m_parityComboBox->addItem("None");
+    m_parityComboBox->addItem("Even");
+    m_parityComboBox->addItem("Odd");
+    m_parityComboBox->setSizePolicy(QSizePolicy::Expanding,
+                                    QSizePolicy::Expanding);
+    hLayout3->addWidget(parityLabel);
+    hLayout3->addWidget(m_parityComboBox);
+    mainLayout->addLayout(hLayout3);
+
+    auto *hLayout4 = new QHBoxLayout();
+    // 数据位选择
+    auto *dataBitsLabel = new QLabel("数据位:", this);
+    m_dataBitsComboBox->addItem("8");
+    m_dataBitsComboBox->addItem("7");
+    m_dataBitsComboBox->addItem("6");
+    m_dataBitsComboBox->setSizePolicy(QSizePolicy::Expanding,
+                                      QSizePolicy::Expanding);
+    hLayout4->addWidget(dataBitsLabel);
+    hLayout4->addWidget(m_dataBitsComboBox);
+    mainLayout->addLayout(hLayout4);
+
+    auto *hLayout5 = new QHBoxLayout();
+    // 停止位选择
+    auto *stopBitsLabel = new QLabel("停止位:", this);
+    m_stopBitsComboBox->addItem("1");
+    m_stopBitsComboBox->addItem("1.5");
+    m_stopBitsComboBox->addItem("2");
+    m_stopBitsComboBox->setSizePolicy(QSizePolicy::Expanding,
+                                      QSizePolicy::Expanding);
+    hLayout5->addWidget(stopBitsLabel);
+    hLayout5->addWidget(m_stopBitsComboBox);
+    mainLayout->addLayout(hLayout5);
+
+    setLayout(mainLayout);
 }

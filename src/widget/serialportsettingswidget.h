@@ -13,7 +13,15 @@ class SerialPortSettingsWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit SerialPortSettingsWidget(QWidget *parent = nullptr);
+    // 布局方向
+    enum LayoutDirection
+    {
+        Horizontal,
+        Vertical
+    };
+
+public:
+    explicit SerialPortSettingsWidget(LayoutDirection direction = Horizontal, QWidget *parent = nullptr);
     ~SerialPortSettingsWidget() override;
 
     QString getSelectedPort() const;
@@ -26,11 +34,17 @@ protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
+    // horizontal layout
     void initUI();
+    // vertical layout
+    void initVerticalUI();
+
     void updateAvailablePorts() const;
     void styleForWindows();
 
 private:
+    LayoutDirection m_direction;
+
     QComboBox *m_portComboBox;
     QComboBox *m_baudRateComboBox;
     QComboBox *m_parityComboBox;
