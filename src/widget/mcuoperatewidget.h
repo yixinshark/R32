@@ -9,6 +9,9 @@
 #include "operatebasewidget.h"
 
 class QGridLayout;
+class QCheckBox;
+class QRadioButton;
+class QComboBox;
 
 class McuOperateWidget : public OperateBaseWidget
 {
@@ -36,7 +39,33 @@ private:
     void initAlarmCtrlUI(int rowIndex);
 
 private:
+    // 显示箱体开关状态
+    void showBoxSwitchStatus(const QByteArray &info);
+    // 显示电磁阀控制状态
+    void showValveCtrlStatus(const QByteArray &info);
+    // 显示风扇控制状态
+    void showFanCtrlStatus(const QByteArray &info);
+    // 显示浓度值
+    void showConcentrationValue(const QByteArray &info);
+    // 显示通道选择值
+    void showChannelSelectValue(const QByteArray &info);
+    // 显示报警灯控制状态
+    void showAlarmCtrlStatus(const QByteArray &info);
+
+private:
     QGridLayout *m_gridLayout;
+    QLineEdit *m_alarmChannelEdit;
+    QLineEdit *m_concentrationEdit;
+    QComboBox  *m_channelBox;
+
+    // 箱体开关
+    QVector<QRadioButton *> m_boxSwitchs;
+    // 电磁阀
+    QVector<QCheckBox *> m_valves;
+    // 风扇
+    QVector<QCheckBox *> m_fans;
+    // 报警开关
+    QVector<QRadioButton *> m_alarmSwitchs;
 };
 
 #endif //R32_MCUOPERATEWIDGET_H

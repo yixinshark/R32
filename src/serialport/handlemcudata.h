@@ -7,6 +7,8 @@
 
 #include "handledatabase.h"
 
+#include <QMap>
+
 class HandleMcuData : public HandleDataBase
 {
     Q_OBJECT
@@ -34,7 +36,6 @@ protected:
     bool addCmd_box_switch_Content(const QVariantMap &info, QByteArray &data);
     // 添加报警灯控制内容
     bool addCmd_alarm_light_Content(const QVariantMap &info, QByteArray &data);
-
 };
 
 #endif //R32_HANDLEMCUDATA_H

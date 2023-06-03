@@ -34,6 +34,7 @@ OperateWidget::OperateWidget(QWidget *parent)
 
     connect(m_operateR32Widget, &OperateR32Widget::operatedMsg, this, &OperateWidget::showMsg);
     connect(m_recvR32DataWidget, &RecvR32DataWidget::operatedMsg, this, &OperateWidget::showMsg);
+    connect(m_mcuOperateWidget, &McuOperateWidget::operatedMsg, this, &OperateWidget::showMsg);
 
 //    connect(m_recvR32DataWidget, &RecvR32DataWidget::r32NDValue, m_operateR32Widget, &OperateR32Widget::setNDValue);
 }

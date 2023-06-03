@@ -6,7 +6,6 @@
 #include "mcuconstant.h"
 
 #include <QDebug>
-#include <QVariantMap>
 
 HandleMcuData::HandleMcuData(QObject *parent)
     : HandleDataBase(parent)
@@ -20,7 +19,37 @@ HandleMcuData::~HandleMcuData()
 
 void HandleMcuData::processReceivedData(const QByteArray &data)
 {
+    m_receivedData.append(data);
 
+    // 1. 判断帧数据是否有效
+    while (m_receivedData.length() >= MCU_FRAME_LEN) {
+        // 2. 判断帧头是否正确
+        if (m_receivedData.at(0) != MCU_RECV_HEADER) {
+            m_receivedData.remove(0, 1);
+            continue;
+        }
+
+        // 3. 提取帧数据
+        QByteArray frameData = m_receivedData.left(MCU_FRAME_LEN);
+        m_receivedData.remove(0, MCU_FRAME_LEN);
+
+        // 4. 判断帧数据是否有效
+        if (!frameIsValid(frameData)) {
+            qWarning() << "frame data is invalid:" << frameData;
+            continue;
+        }
+
+        Q_EMIT recvedFrameData(frameData);
+
+        // 5. 提取帧内容
+        char cmd = frameData.at(1);
+        QByteArray content = frameData.mid(2, MCU_CONTENT_LEN);
+
+        QVariantMap info;
+        info.insert(MCU_RECV_DATA, content);
+
+        Q_EMIT frameReceived(cmd, info);
+    }
 }
 
 void HandleMcuData::addContent(char cmd, const QVariantMap &info, QByteArray &data)
@@ -78,7 +107,9 @@ bool HandleMcuData::addCmd_fan_Content(const QVariantMap &info, QByteArray &data
 bool HandleMcuData::addCmd_nd_Content(const QVariantMap &info, QByteArray &data)
 {
     if (info.contains(MCU_ND)) {
-        data.append(info[MCU_ND].toByteArray());
+        quint16 nd = static_cast<quint16>(info[MCU_ND].toUInt());
+        data.append((char)(nd >> 8));
+        data.append((char)(nd & 0xFF));
         data.append((char)0x00); // 填充一个字节
         data.append((char)0x00); // 填充一个字节
         data.append((char)0x00); // 填充一个字节
@@ -143,7 +174,19 @@ bool HandleMcuData::addCmd_alarm_light_Content(const QVariantMap &info, QByteArr
 
 bool HandleMcuData::frameIsValid(const QByteArray &frameData)
 {
-    return false;
+    // 最后两个字节和前面字节和比较
+    int sum = 0;
+    for (int i = 0; i < MCU_FRAME_LEN - 2; ++i) {
+        sum += frameData.at(i);
+    }
+
+    int sum2 = (frameData.at(MCU_FRAME_LEN - 2) << 8) + frameData.at(MCU_FRAME_LEN - 1);
+    if (sum != sum2) {
+        qWarning() << "frame data is invalid:" << frameData;
+        return false;
+    }
+
+    return true;
 }
 
 

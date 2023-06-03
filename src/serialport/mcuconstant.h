@@ -8,8 +8,14 @@
 #include <QString>
 
 // 单片机常量
-const char MCU_SEND_HEADER = 0x51;
-const char MCU_RECV_HEADER = 0x52;
+const char MCU_SEND_HEADER = 0x61;
+const char MCU_RECV_HEADER = 0x62;
+
+const int MCU_CONTENT_LEN = 5;
+const int MCU_FRAME_LEN = 9;
+
+const char OPEN = 0x01;
+const char CLOSE = 0x00;
 
 // 电磁阀常量...
 const char MCU_CMD_VALVE = 0x47;
@@ -31,5 +37,6 @@ const QString MCU_BOX_SWITCH = "box_switch";
 // 报警灯
 const QString MCU_ALARM_LIGHT = "alarm_light";
 
+const QString MCU_RECV_DATA = "recv_data";
 
 #endif //R32_MCUCONSTANT_H

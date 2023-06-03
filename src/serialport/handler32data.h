@@ -59,7 +59,7 @@ private:
 
 private:
     typedef bool (Handler32data::*readFunc)(quint8 cmd, const QByteArray &data, QVariantMap &value);
-    QMap<quint8 , readFunc> m_readFuncMap;
+    QMap<quint8, readFunc> m_readFuncMap;
 
 private:
     char m_address = 0x00;
