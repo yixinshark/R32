@@ -13,7 +13,7 @@ SerialPortCom::SerialPortCom(QObject *parent)
     : QObject(parent)
     , m_serialPort(new QSerialPort(this))
 {
-
+    connect(m_serialPort, &QSerialPort::aboutToClose, this, &SerialPortCom::serialPortClosed);
 }
 
 SerialPortCom::~SerialPortCom()

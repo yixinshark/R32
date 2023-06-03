@@ -71,7 +71,7 @@ QLineEdit[readOnly="true"] {
     /* 设置只读文本框的样式 */
     background-color: #F5F5F5;
     border-color: #CCCCCC;
-    color: #999999;  /* 设置只读文本的颜色 */
+    color: black;
 }
 
 QLineEdit[readOnly="true"]:focus {

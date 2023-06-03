@@ -30,6 +30,7 @@ public:
 signals:
     void cmdCompleted(quint8 cmd);
     void operatedMsg(const QString &msg);
+    void serialPortClosed();
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;

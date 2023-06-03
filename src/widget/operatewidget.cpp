@@ -40,6 +40,9 @@ OperateWidget::OperateWidget(QWidget *parent)
             m_mcuCtrlStatusWidget, &McuCtrlStatusWidget::updateFanStatus);
     connect(m_mcuOperateWidget, &McuOperateWidget::valveStatusChanged,
             m_mcuCtrlStatusWidget, &McuCtrlStatusWidget::updateValveStatus);
+
+    connect(m_mcuOperateWidget, &McuOperateWidget::serialPortClosed,
+            m_mcuCtrlStatusWidget, &McuCtrlStatusWidget::reset);
 //    connect(m_recvR32DataWidget, &RecvR32DataWidget::r32NDValue, m_operateR32Widget, &OperateR32Widget::setNDValue);
 }
 

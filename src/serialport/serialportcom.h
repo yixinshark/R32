@@ -21,6 +21,7 @@ public:
     bool isSerialPortOpen() const;
 
 signals:
+    void serialPortClosed();
     void dataReceived(const QByteArray &data);
 
 public slots:

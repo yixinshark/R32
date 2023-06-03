@@ -177,10 +177,11 @@ bool HandleMcuData::frameIsValid(const QByteArray &frameData)
     // 最后两个字节和前面字节和比较
     int sum = 0;
     for (int i = 0; i < MCU_FRAME_LEN - 2; ++i) {
-        sum += frameData.at(i);
+        sum += (quint8)frameData.at(i);
     }
 
-    int sum2 = (frameData.at(MCU_FRAME_LEN - 2) << 8) + frameData.at(MCU_FRAME_LEN - 1);
+    // 最后两个字节是校验和，高位在前，低位在后
+    int sum2 = (quint8)frameData.at(MCU_FRAME_LEN - 2) << 8 | (quint8)frameData.at(MCU_FRAME_LEN - 1);
     if (sum != sum2) {
         qWarning() << "frame data is invalid:" << frameData;
         return false;

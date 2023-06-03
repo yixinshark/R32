@@ -29,6 +29,13 @@ OperateBaseWidget::OperateBaseWidget(HandleDataBase *handleData, QWidget *parent
 
     connect(m_serialPortCom, &SerialPortCom::dataReceived,
             m_handleData, &HandleDataBase::processReceivedData);
+    connect(m_serialPortCom, &SerialPortCom::serialPortClosed, this, [this]{
+        m_connectBtn->setObjectName("connect");
+        m_connectBtn->setText("连接");
+        m_connectBtn->setEnabled(true);
+        m_cntStatusWidget->setSelected(false);
+        Q_EMIT serialPortClosed();
+    });
 
     connect(m_handleData, &HandleDataBase::recvedFrameData, this, [this](const QByteArray &data){
         operateMsg("接收到数据:" + data.toHex());

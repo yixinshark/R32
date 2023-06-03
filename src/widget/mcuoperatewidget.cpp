@@ -215,7 +215,9 @@ void McuOperateWidget::initAlarmCtrlUI(int rowIndex)
     m_delayBtnList.append(alarmButton);
     auto *alarmLabel = new QLabel("通道:", this);
     auto *alarmOnRadioButton = new QRadioButton("开");
+    alarmOnRadioButton->setChecked(false);
     auto *alarmOffRadioButton = new QRadioButton("关");
+    alarmOffRadioButton->setChecked(false);
     m_alarmSwitchs.append(alarmOnRadioButton);
     m_alarmSwitchs.append(alarmOffRadioButton);
 
@@ -282,9 +284,9 @@ void McuOperateWidget::recvAckData(quint8 cmd, const QVariantMap &info)
 
 void McuOperateWidget::showBoxSwitchStatus(const QByteArray &info)
 {
-    char openStatus = info.at(0);
-    m_boxSwitchs.at(0)->setChecked(openStatus & OPEN);
-    m_boxSwitchs.at(1)->setChecked(openStatus & OPEN);
+    bool isChecked = info.at(1) & 0x01;
+    m_boxSwitchs.at(0)->setChecked(isChecked);
+    m_boxSwitchs.at(1)->setChecked(!isChecked);
 }
 
 void McuOperateWidget::showValveCtrlStatus(const QByteArray &info)

@@ -66,7 +66,7 @@ void McuCtrlStatusWidget::updateFanStatus(const QByteArray &data)
 {
     // 更新状态
     for (int i = 0; i < m_fanWidgets.size(); ++i) {
-        m_fanWidgets[i]->setFanOpened(data.at(i) == 0x01);
+        m_fanWidgets[i]->setFanOpened(data.at(i) & 0x01);
     }
 }
 
@@ -74,6 +74,17 @@ void McuCtrlStatusWidget::updateValveStatus(const QByteArray &data)
 {
     // 更新状态
     for (int i = 0; i < m_valveWidgets.size(); ++i) {
-        m_valveWidgets[i]->setValveOpened(data.at(i) == 0x01);
+        m_valveWidgets[i]->setValveOpened(data.at(i) & 0x01);
+    }
+}
+
+void McuCtrlStatusWidget::reset()
+{
+    for (auto *fanWidget : m_fanWidgets) {
+        fanWidget->setFanOpened(false);
+    }
+
+    for (auto *valveWidget : m_valveWidgets) {
+        valveWidget->setValveOpened(false);
     }
 }

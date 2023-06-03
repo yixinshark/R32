@@ -14,16 +14,16 @@ const char MCU_RECV_HEADER = 0x62;
 const int MCU_CONTENT_LEN = 5;
 const int MCU_FRAME_LEN = 9;
 
-const char OPEN = 0x01;
-const char CLOSE = 0x00;
+const quint8 OPEN = 0x01;
+const quint8 CLOSE = 0x00;
 
 // 电磁阀常量...
 const char MCU_CMD_VALVE = 0x47;
 const char MCU_CMD_FAN = 0x57;
 const char MCU_CMD_ND = 0x67;
 const char MCU_CMD_CHANNEL = 0x77;
-const char MCU_CMD_BOX = 0x87;
-const char MCU_CMD_ALARM_LIGHT = 0x97;
+const quint8 MCU_CMD_BOX = 0x87;
+const quint8 MCU_CMD_ALARM_LIGHT = 0x97;
 
 const QString MCU_VALVE = "valve";
 // 风扇

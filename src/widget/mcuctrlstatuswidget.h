@@ -20,6 +20,8 @@ public:
     explicit McuCtrlStatusWidget(QWidget *parent = nullptr);
     ~McuCtrlStatusWidget() override;
 
+    void reset();
+
 public slots:
     void updateFanStatus(const QByteArray &data);
     void updateValveStatus(const QByteArray &data);

@@ -88,7 +88,7 @@ bool Handler32data::frameIsValid(const QByteArray &frameData) {
 
     int sum = 0;
     for (int i = 0; i < frameData.length() - 1; ++i) {
-        sum += frameData.at(i);
+        sum += (quint8)frameData.at(i);
     }
 
     // 取sum的低8字节和sumLow8比较
