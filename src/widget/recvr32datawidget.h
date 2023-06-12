@@ -35,7 +35,7 @@ private:
     QGridLayout *m_gridLayout;
 
     // R32
-    QLineEdit *m_showR32ADCValue;
+    QLineEdit *m_showAlarmValue;
     QLineEdit *m_showR32NDValue;
 };
 

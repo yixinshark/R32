@@ -10,6 +10,7 @@
 
 #include "handler32data.h"
 #include "handlemcudata.h"
+#include "handleanalyserdata.h"
 
 #include <QLabel>
 #include <QGroupBox>
@@ -24,9 +25,10 @@ OperateWidget::OperateWidget(QWidget *parent)
 
     auto *handlerMcuData = new HandleMcuData(this);
     auto *handler32Data = new Handler32data(this);
+    auto *handlerAnalyserData = new HandleAnalyserData(this);
 
     m_operateR32Widget = new OperateR32Widget(handler32Data, this);
-    m_recvR32DataWidget = new RecvR32DataWidget(handler32Data, this);
+    m_recvR32DataWidget = new RecvR32DataWidget(handlerAnalyserData, this);
     m_mcuOperateWidget = new McuOperateWidget(handlerMcuData, this);
     m_mcuCtrlStatusWidget = new McuCtrlStatusWidget(this);
 
