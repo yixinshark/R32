@@ -9,7 +9,6 @@
 LabelButton::LabelButton(const QString &text, QWidget *parent)
     : QLabel(parent)
 {
-    setText(text);
     QFont font;
     font.setPixelSize(16);
     font.setBold(true);
@@ -17,6 +16,7 @@ LabelButton::LabelButton(const QString &text, QWidget *parent)
 
     setMinimumHeight(30);
     setAlignment(Qt::AlignCenter);
+    setText(text);
 }
 
 LabelButton::~LabelButton()
