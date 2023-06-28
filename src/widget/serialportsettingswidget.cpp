@@ -55,6 +55,7 @@ void SerialPortSettingsWidget::initUI()
 
     // 波特率选择
     auto *baudRateLabel = new QLabel("波特率:", this);
+    m_baudRateComboBox->addItem("2400");
     m_baudRateComboBox->addItem("9600");
     m_baudRateComboBox->addItem("115200");
     hLayout->addWidget(baudRateLabel);
