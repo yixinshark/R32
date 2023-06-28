@@ -46,6 +46,7 @@ set(QRCS
 add_executable(r32
         ${R32_SRCS}
         ${QRCS}
+        app_win32.rc
         )
 
 target_link_libraries(r32

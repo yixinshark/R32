@@ -18,7 +18,7 @@ QPushButton {
     min-height: 20px;
 
     /* 设置按钮的字体 */
-    font-size: 14px;
+    font-size: 16px;
 }
 
 QPushButton:hover {

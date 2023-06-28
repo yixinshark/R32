@@ -17,6 +17,8 @@ MainWidget::MainWidget(QWidget *parent)
     , m_queryWidget(new QueryWidget(this))
 {
     initUI();
+    setWindowIcon(QIcon(":src/res/favicon.ico"));
+    setWindowTitle("华工高理冷媒传感器标定测试系统");
 }
 
 MainWidget::~MainWidget()

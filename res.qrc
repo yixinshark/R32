@@ -4,5 +4,6 @@
         <file>src/res/r32.qss</file>
         <file>src/res/down.png</file>
         <file>src/res/detectvalue.sql</file>
+        <file>src/res/favicon.ico</file>
     </qresource>
 </RCC>

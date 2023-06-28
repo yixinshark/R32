@@ -138,10 +138,12 @@ bool OperateBaseWidget::connectSerialPort()
 
     QString parity = m_serialPortSettings->getSelectedParity();
     QSerialPort::Parity sParity = QSerialPort::UnknownParity;
-    if (parity == "Even") {
+    if (parity == "偶校验") {
         sParity = QSerialPort::EvenParity;
-    } else if (parity == "Odd") {
+    } else if (parity == "奇校验") {
         sParity = QSerialPort::OddParity;
+    } else if (parity == "无") {
+        sParity = QSerialPort::NoParity;
     }
 
     QString stopBits = m_serialPortSettings->getSelectedStopBits();

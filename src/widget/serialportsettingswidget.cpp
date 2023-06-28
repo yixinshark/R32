@@ -63,9 +63,9 @@ void SerialPortSettingsWidget::initUI()
 
     // 校验位选择
     auto *parityLabel = new QLabel("校验位:");
-    m_parityComboBox->addItem("None");
-    m_parityComboBox->addItem("Even");
-    m_parityComboBox->addItem("Odd");
+    m_parityComboBox->addItem("无");
+    m_parityComboBox->addItem("偶校验");
+    m_parityComboBox->addItem("奇校验");
     hLayout->addWidget(parityLabel);
     hLayout->addWidget(m_parityComboBox);
 
@@ -206,6 +206,7 @@ void SerialPortSettingsWidget::initVerticalUI()
     auto *hLayout2 = new QHBoxLayout();
     // 波特率选择
     auto *baudRateLabel = new QLabel("波特率:", this);
+    m_baudRateComboBox->addItem("2400");
     m_baudRateComboBox->addItem("9600");
     m_baudRateComboBox->addItem("115200");
     m_baudRateComboBox->setSizePolicy(QSizePolicy::Expanding,
@@ -217,9 +218,9 @@ void SerialPortSettingsWidget::initVerticalUI()
     auto *hLayout3 = new QHBoxLayout();
     // 校验位选择
     auto *parityLabel = new QLabel("校验位:");
-    m_parityComboBox->addItem("None");
-    m_parityComboBox->addItem("Even");
-    m_parityComboBox->addItem("Odd");
+    m_parityComboBox->addItem("无");
+    m_parityComboBox->addItem("偶校验");
+    m_parityComboBox->addItem("奇校验");
     m_parityComboBox->setSizePolicy(QSizePolicy::Expanding,
                                     QSizePolicy::Expanding);
     hLayout3->addWidget(parityLabel);
