@@ -128,7 +128,11 @@ void QueryWidget::handleExportButton() {
 }
 
 void QueryWidget::exportToExcel(const QString &filename) {
-    QAxObject *excel = new QAxObject("Excel.Application", this);
+    auto *excel = new QAxObject("Excel.Application", this);
+    if (!excel) {
+        QMessageBox::warning(this, "错误", "无法导出Excel文件，请检查是否安装Excel!");
+        return;
+    }
     excel->dynamicCall("SetVisible(bool)", false);
     QAxObject *workbooks = excel->querySubObject("Workbooks");
     QAxObject *workbook = workbooks->querySubObject("Add");
