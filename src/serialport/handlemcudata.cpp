@@ -57,7 +57,7 @@ void HandleMcuData::addContent(char cmd, const QVariantMap &info, QByteArray &da
     data.append(MCU_SEND_HEADER);
     data.append(cmd);
 
-    switch (cmd) {
+    switch ((quint8)cmd) {
         case MCU_CMD_VALVE:
             addCmd_valve_Content(info, data);
             break;
