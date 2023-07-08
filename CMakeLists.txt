@@ -58,3 +58,10 @@ target_link_libraries(r32
         Qt5::SerialPort
         Qt5::AxContainer
         )
+
+# 在Windows上隐藏控制台窗口
+#if(WIN32)
+#    set_target_properties(${PROJECT_NAME} PROPERTIES
+#            WIN32_EXECUTABLE YES
+#            )
+#endif()

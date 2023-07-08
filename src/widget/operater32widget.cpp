@@ -5,6 +5,7 @@
 #include "operater32widget.h"
 #include "delayedbutton.h"
 #include "r32constant.h"
+#include "alarmwidget.h"
 
 #include <QDebug>
 #include <QGridLayout>
@@ -39,8 +40,11 @@ OperateR32Widget::OperateR32Widget(HandleDataBase *handleData, QWidget *parent)
     , m_printDataSwitchResultEdit(new QLineEdit(this))
     , m_setModuleAddressResultEdit(new QLineEdit(this))
     , m_readModuleAddressResultEdit(new QLineEdit(this))
+    , m_alarmWidget(new AlarmWidget(this))
 {
     initUI();
+    connect(this, &OperateR32Widget::serialPortClosed,
+            m_alarmWidget, &AlarmWidget::reset);
 }
 
 OperateR32Widget::~OperateR32Widget()
@@ -51,7 +55,7 @@ OperateR32Widget::~OperateR32Widget()
 void OperateR32Widget::initUI()
 {
     m_mainLayout->setSpacing(20);
-    m_mainLayout->addLayout(initSerialPortUI());
+    // m_mainLayout->addLayout(initSerialPortUI());
 
     auto *widget = new QWidget(this);
     m_gridLayout->setContentsMargins(0, 0, 0, 0);
@@ -67,9 +71,16 @@ void OperateR32Widget::initUI()
     // 初始化系统类指令UI
     initSystemCmdUI();
 
-    // 初始化广播类指令UI
-    initBroadcastCmdUI();
+    // 初始化串口和广播类指令UI
+    auto *vLayout = new QVBoxLayout();
+    vLayout->addLayout(initSerialPortUI());
+    vLayout->addLayout(initBroadcastCmdUI());
 
+    auto *hLayout = new QHBoxLayout();
+    hLayout->addLayout(vLayout);
+    hLayout->addWidget(m_alarmWidget);
+
+    m_mainLayout->addLayout(hLayout);
     m_mainLayout->addWidget(widget);
 }
 
@@ -387,7 +398,7 @@ void OperateR32Widget::initSystemCmdUI()
     m_gridLayout->addWidget(m_printDataSwitchResultEdit, 4, 10, 1, 1);
 }
 
-void OperateR32Widget::initBroadcastCmdUI()
+QLayout *OperateR32Widget::initBroadcastCmdUI()
 {
     // 设置模块地址按钮
     auto *setModuleAddressBtn = new DelayedButton("设置模块地址", this);
@@ -403,6 +414,7 @@ void OperateR32Widget::initBroadcastCmdUI()
     connect(setModuleAddressBtn, &DelayedButton::clicked, this, [moduleAddressInput, this](){
         m_setModuleAddressResultEdit->clear();
         QString moduleAddress = moduleAddressInput->text();
+        m_curModuleAddress = (char)moduleAddress.toInt();
         if (moduleAddress.isEmpty()) {
             m_setModuleAddressResultEdit->setText("请输入模块地址");
             return;
@@ -439,12 +451,14 @@ void OperateR32Widget::initBroadcastCmdUI()
     hLayout->addWidget(setModuleAddressBtn);
     hLayout->addWidget(moduleAddressInput);
     hLayout->addWidget(m_setModuleAddressResultEdit);
-    hLayout->addStretch(1);
+    // hLayout->addStretch(1);
     hLayout->addWidget(readModuleAddressBtn);
     hLayout->addWidget(m_readModuleAddressResultEdit);
-    hLayout->addStretch(2);
+    // hLayout->addStretch(2);
 
-    m_mainLayout->addLayout(hLayout);
+    // m_mainLayout->addLayout(hLayout);
+
+    return hLayout;
 }
 
 void OperateR32Widget::recvAckData(quint8 cmd, const QVariantMap &info)
@@ -467,7 +481,7 @@ void OperateR32Widget::recvAckData(quint8 cmd, const QVariantMap &info)
             }
             break;
         case CMD_ND_STATUS_03:
-            showOperationResult(info, m_calStatusResultEdit);
+            showCalibrationStatusResult(info);
             break;
         case CMD_READ_R0_04:
             showOperationData(cmd, info, m_readZeroResResultEdit);
@@ -542,4 +556,16 @@ void OperateR32Widget::showOperationData(char cmd, const QVariantMap &info, QLin
 void OperateR32Widget::showAlarmThreshold(const QVariantMap &info)
 {
     m_readAlarmThresholdResultEdit->setText(QString::number(info.value(ACK_ALARM_THRESHOLD).toUInt()));
+}
+
+void OperateR32Widget::showCalibrationStatusResult(const QVariantMap &info)
+{
+    qInfo() << "showOperationResult" << m_curModuleAddress << info.value(ACK_RESULT).toString();
+    if (info.value(ACK_RESULT).toString() == "成功") {
+        m_alarmWidget->setLightStatus(m_curModuleAddress, true);
+        m_calStatusResultEdit->setText("校准成功");
+    } else {
+        m_alarmWidget->setLightStatus(m_curModuleAddress, false);
+        m_calStatusResultEdit->setText(info.value(ACK_ERROR).toString());
+    }
 }

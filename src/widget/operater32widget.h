@@ -11,6 +11,7 @@
 
 class QGridLayout;
 class QVBoxLayout;
+class AlarmWidget;
 
 class OperateR32Widget : public OperateBaseWidget
 {
@@ -34,14 +35,18 @@ private:
     // 初始化系统类指令UI
     void initSystemCmdUI();
     // 初始化广播类指令UI
-    void initBroadcastCmdUI();
+    QLayout *initBroadcastCmdUI();
 
 private:
     void showOperationResult(const QVariantMap &info, QLineEdit *showEdit);
     void showOperationData(char cmd, const QVariantMap &info, QLineEdit *showEdit);
     void showAlarmThreshold(const QVariantMap &info);
 
+    // 显示标定状态结果
+    void showCalibrationStatusResult(const QVariantMap &info);
+
 private:
+    char m_curModuleAddress = 0x00;
     QGridLayout *m_gridLayout;
     QVBoxLayout *m_mainLayout;
 
@@ -95,6 +100,8 @@ private:
     QLineEdit *m_setModuleAddressResultEdit;
     // 读取模块地址结果框
     QLineEdit *m_readModuleAddressResultEdit;
+
+    AlarmWidget *m_alarmWidget = nullptr;
 };
 
 #endif //R32_OPERATER32WIDGET_H
