@@ -325,12 +325,14 @@ bool Handler32data::readTemperatureHumidity(quint8 cmd, const QByteArray &data, 
 
     // 读取温度
     qint16 temperature = 0;
-    memcpy(&temperature, data.data(), 2);
+    // 高字节在前，低字节在后,有符号数
+    temperature = (static_cast<qint8>(data.at(0)) << 8) | (static_cast<quint8>(data.at(1)));
     value.insert(ACK_TEMPERATURE, temperature / 10.0);
 
     // 读取湿度
-    qint16 humidity = 0;
-    memcpy(&humidity, data.data() + 2, 2);
+    quint16 humidity = 0;
+    // 高字节在前，低字节在后
+    humidity = (static_cast<quint8>(data.at(2)) << 8) | (static_cast<quint8>(data.at(3)));
     value.insert(ACK_HUMIDITY, humidity / 10.0);
 
     return true;
@@ -346,7 +348,8 @@ bool Handler32data::readGasProbeADC(quint8 cmd, const QByteArray &data, QVariant
 
     // 读取ADC值
     quint16 adc = 0;
-    memcpy(&adc, data.data(), 2);
+    // 高字节在前，低字节在后
+    adc = (static_cast<quint8>(data.at(0)) << 8) | (static_cast<quint8>(data.at(1)));
     value.insert(ACK_ADC_VALUE, adc);
 
     return true;
@@ -362,8 +365,9 @@ bool Handler32data::readGasProbeResistance(quint8 cmd, const QByteArray &data, Q
 
     // 读取电阻值
     float resistance = 0;
-    memcpy(&resistance, data.data(), 4);
-
+    // 4个字节存储的float值
+    resistance = (static_cast<quint8>(data.at(0)) << 24) | (static_cast<quint8>(data.at(1)) << 16) |
+            (static_cast<quint8>(data.at(2)) << 8) | (static_cast<quint8>(data.at(3)));
     value.insert(ACK_FLOAT_VALUE, resistance);
 
     return true;
@@ -379,7 +383,8 @@ bool Handler32data::readGasConcentration(quint8 cmd, const QByteArray &data, QVa
 
     // 读取浓度值
     quint16 concentration = 0;
-    memcpy(&concentration, data.data(), 2);
+    // 高字节在前，低字节在后
+    concentration = (static_cast<quint8>(data.at(0)) << 8) | (static_cast<quint8>(data.at(1)));
     value.insert(ACK_GAS_CONCENTRATION, concentration);
 
     // 读取报警状态
