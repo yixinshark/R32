@@ -38,6 +38,7 @@ OperateR32Widget::OperateR32Widget(HandleDataBase *handleData, QWidget *parent)
     , m_readAlarmThresholdResultEdit(new QLineEdit(this))
     , m_readFaultCodeResultEdit(new QLineEdit(this))
     , m_printDataSwitchResultEdit(new QLineEdit(this))
+    , m_setSlaveAddressEdit(new QLineEdit(this))
     , m_setModuleAddressResultEdit(new QLineEdit(this))
     , m_readModuleAddressResultEdit(new QLineEdit(this))
     , m_alarmWidget(new AlarmWidget(this))
@@ -405,16 +406,15 @@ QLayout *OperateR32Widget::initBroadcastCmdUI()
     setModuleAddressBtn->installEventFilter(this);
     m_delayBtnList.append(setModuleAddressBtn);
     // 输入模块地址
-    auto *moduleAddressInput = new QLineEdit(this);
-    moduleAddressInput->setMaximumWidth(80);
+    m_setSlaveAddressEdit->setMaximumWidth(80);
     // 输入模块地址结果
     m_setModuleAddressResultEdit->setPlaceholderText("设置模块地址结果");
     m_setModuleAddressResultEdit->setReadOnly(true);
 
-    connect(setModuleAddressBtn, &DelayedButton::clicked, this, [moduleAddressInput, this](){
+    connect(setModuleAddressBtn, &DelayedButton::clicked, this, [this](){
         m_setModuleAddressResultEdit->clear();
-        QString moduleAddress = moduleAddressInput->text();
-        m_curModuleAddress = (char)moduleAddress.toInt();
+        QString moduleAddress = m_setSlaveAddressEdit->text();
+        m_curModuleAddress = (quint8)moduleAddress.toUInt();
         if (moduleAddress.isEmpty()) {
             m_setModuleAddressResultEdit->setText("请输入模块地址");
             return;
@@ -449,7 +449,7 @@ QLayout *OperateR32Widget::initBroadcastCmdUI()
 
     auto *hLayout = new QHBoxLayout;
     hLayout->addWidget(setModuleAddressBtn);
-    hLayout->addWidget(moduleAddressInput);
+    hLayout->addWidget(m_setSlaveAddressEdit);
     hLayout->addWidget(m_setModuleAddressResultEdit);
     // hLayout->addStretch(1);
     hLayout->addWidget(readModuleAddressBtn);
@@ -476,6 +476,9 @@ void OperateR32Widget::recvAckData(quint8 cmd, const QVariantMap &info)
             if (info.value(MODULE_ADDRESS).toBool()) {
                 quint8 address = static_cast<quint8>(info.value(READ_MODULE_ADDRESS).toUInt());
                 m_readModuleAddressResultEdit->setText("0x" + QString::number(address, 16));
+                // 将读取到的模块地址设置到设置模块地址的输入框中
+                m_setSlaveAddressEdit->setText("0x" + QString::number(address, 16));
+                m_curModuleAddress = address;
             } else {
                 showOperationResult(info, m_calFinishResultEdit);
             }
@@ -569,3 +572,10 @@ void OperateR32Widget::showCalibrationStatusResult(const QVariantMap &info)
         m_calStatusResultEdit->setText(info.value(ACK_ERROR).toString());
     }
 }
+
+void OperateR32Widget::setSelectedChannel(int channel)
+{
+    //m_curModuleAddress = channel;
+    m_setSlaveAddressEdit->setText("0x" + QString::number(channel, 16));
+}
+

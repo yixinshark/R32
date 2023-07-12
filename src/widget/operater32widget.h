@@ -20,6 +20,8 @@ public:
     explicit OperateR32Widget(HandleDataBase *handleData, QWidget *parent = nullptr);
     ~OperateR32Widget() override;
 
+    void setSelectedChannel(int channel);
+
 protected:
     void recvAckData(quint8 cmd, const QVariantMap &info) override;
 
@@ -46,7 +48,7 @@ private:
     void showCalibrationStatusResult(const QVariantMap &info);
 
 private:
-    char m_curModuleAddress = 0x00;
+    quint8 m_curModuleAddress = 0x00;
     QGridLayout *m_gridLayout;
     QVBoxLayout *m_mainLayout;
 
@@ -96,6 +98,8 @@ private:
     // 读取打印数据开关结果框
     QLineEdit *m_printDataSwitchResultEdit;
 
+    // 设置从机地址框
+    QLineEdit *m_setSlaveAddressEdit;
     // 设置模块地址结果框
     QLineEdit *m_setModuleAddressResultEdit;
     // 读取模块地址结果框

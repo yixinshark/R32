@@ -45,7 +45,10 @@ OperateWidget::OperateWidget(QWidget *parent)
 
     connect(m_mcuOperateWidget, &McuOperateWidget::serialPortClosed,
             m_mcuCtrlStatusWidget, &McuCtrlStatusWidget::reset);
-//    connect(m_recvR32DataWidget, &RecvR32DataWidget::r32NDValue, m_operateR32Widget, &OperateR32Widget::setNDValue);
+    // connect(m_recvR32DataWidget, &RecvR32DataWidget::r32NDValue, m_operateR32Widget, &OperateR32Widget::setNDValue);
+    // 单片机选择通道后同步到模块地址上
+    connect(m_mcuOperateWidget, &McuOperateWidget::channelSelectChanged,
+            m_operateR32Widget, &OperateR32Widget::setSelectedChannel);
 }
 
 OperateWidget::~OperateWidget()

@@ -205,6 +205,7 @@ void McuOperateWidget::initChannelSelectUI(int rowIndex)
         info.insert(MCU_SET_CHANNEL, m_channelBox->currentText().toInt());
 
         sendCmdData(MCU_CMD_CHANNEL, info);
+        Q_EMIT channelSelectChanged(m_channelBox->currentText().toInt());
     });
 }
 

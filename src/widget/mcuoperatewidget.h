@@ -23,6 +23,7 @@ public:
 signals:
     void fanStatusChanged(const QByteArray &data);
     void valveStatusChanged(const QByteArray &data);
+    void channelSelectChanged(int channel);
 
 protected:
     void recvAckData(quint8 cmd, const QVariantMap &info) override;
